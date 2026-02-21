@@ -1,0 +1,5 @@
+data/
+github令牌.txt
+__pycache__/
+*.pyc
+.vscode/
