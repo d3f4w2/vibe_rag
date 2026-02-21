@@ -28,5 +28,5 @@ automated_test: conda run -n vibe-rag python -m pytest -k text_cleaner -q -> 3 p
 manual_test: user confirmed manual verification passed for control-char cleanup and UTF-8 decode error handling
 changes: added tests/test_text_cleaner.py; added src/ingestion/text_cleaner.py with clean_text/read_and_clean_text and TextCleaningError
 notes: STEP-03 completed under current-step scope only; no cross-step implementation; waiting for commit hash backfill; do not enter STEP-04 without explicit start next step
-commit_ref: pending
-updated_at: 2026-02-21T21:04:54.3045915+08:00
+commit_ref: 20e4413
+updated_at: 2026-02-21T21:08:31.2424643+08:00
