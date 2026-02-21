@@ -39,5 +39,5 @@ automated_test: conda run -n vibe-rag python -m pytest -k metadata_store -q -> 3
 manual_test: user confirmed moving to git stage, treated as manual verification passed for STEP-04 acceptance flow
 changes: added tests/test_metadata_store.py; added src/ingestion/report_time_parser.py and src/ingestion/metadata_store.py; implemented PDF timestamp parsing and JSONL metadata build/write/read
 notes: STEP-04 completed under current-step scope only; milestone EPIC-INGESTION reached; architecture synced; do not enter STEP-05 without explicit start next step
-commit_ref: pending
-updated_at: 2026-02-21T21:53:35.9072809+08:00
+commit_ref: 88c3023
+updated_at: 2026-02-21T21:57:29.9519960+08:00
