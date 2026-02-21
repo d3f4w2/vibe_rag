@@ -1,0 +1,100 @@
+# Architecture Baseline（Plan-Level, V1）
+
+模块名称: ingestion.case_scanner
+文件路径: src/ingestion/case_scanner.py
+职责: 扫描 `data/HSIL/*` 与 `data/LSIL/*`，校验病例目录完整性（5 JPG + 1 PDF + 1 TXT）。
+输入/输出: 输入为 data 根目录路径；输出为结构化病例清单与可追踪错误列表。
+依赖: src/models/case_record.py
+变更原因: 对齐 STEP-02，先定义数据入口边界，避免后续扫描逻辑漂移。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: ingestion.text_cleaner
+文件路径: src/ingestion/text_cleaner.py
+职责: 统一 UTF-8 读取并清理 `0x7F` 控制字符。
+输入/输出: 输入为原始文本或文本文件；输出为清洗后的标准化文本。
+依赖: Python 标准库编码/字符串处理。
+变更原因: 对齐 STEP-03 与 PRD 验收标准 4。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: ingestion.report_time_parser
+文件路径: src/ingestion/report_time_parser.py
+职责: 从 PDF 文件名解析 `YYYYMMDDHHMMSS` 报告时间。
+输入/输出: 输入为 PDF 文件名；输出为结构化时间对象或解析错误。
+依赖: Python datetime、正则处理。
+变更原因: 对齐 STEP-04，固定报告时间来源规则。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: ingestion.metadata_store
+文件路径: src/ingestion/metadata_store.py
+职责: 将解析后的病例元数据写入 JSONL，供检索索引使用。
+输入/输出: 输入为结构化病例记录；输出为 JSONL 文件与写入状态。
+依赖: src/ingestion/report_time_parser.py
+变更原因: 对齐 STEP-04，形成 ingestion 到 retrieval 的稳定数据接口。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: retrieval.document_builder
+文件路径: src/retrieval/document_builder.py
+职责: 组装向量检索文档，合并 `stain_text`（必需）与 `report_text`（可选）及元数据。
+输入/输出: 输入为病例结构与文本字段；输出为检索文档对象列表。
+依赖: src/ingestion/metadata_store.py
+变更原因: 对齐 STEP-05，固定检索输入契约。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: infra.api_client
+文件路径: src/infra/api_client.py
+职责: 统一封装 embedding/generation API 调用、超时重试与错误映射。
+输入/输出: 输入为文本或 prompt；输出为向量结果或生成文本；失败时抛出统一错误类型。
+依赖: httpx、pydantic-settings
+变更原因: 对齐 STEP-06 决策锁定，避免业务层直接访问 HTTP。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: retrieval.vector_store_chroma
+文件路径: src/retrieval/vector_store_chroma.py
+职责: 管理 Chroma 持久化索引与向量检索操作（vector_only）。
+输入/输出: 输入为文档向量与查询向量；输出为 Top-K 检索结果（含相似度）。
+依赖: chroma, src/infra/api_client.py
+变更原因: 对齐 STEP-06，确保检索主链路可落地。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: retrieval.retriever
+文件路径: src/retrieval/retriever.py
+职责: 编排检索流程（文档准备 -> 向量化 -> Top-K 召回 -> 证据整理）。
+输入/输出: 输入为查询文本与 top_k；输出为 `similar_cases[]` 候选列表。
+依赖: src/retrieval/document_builder.py, src/retrieval/vector_store_chroma.py
+变更原因: 对齐 STEP-06，与后续倾向判断模块解耦。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: reasoning.tendency_service
+文件路径: src/reasoning/tendency_service.py
+职责: 基于召回证据输出 `HSIL | LSIL | Uncertain`、reason、disclaimer。
+输入/输出: 输入为 Top-K 检索结果；输出为 tendency 决策对象。
+依赖: src/retrieval/retriever.py
+变更原因: 对齐 STEP-07，固化阈值与分散判定规则。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: cli.main
+文件路径: src/cli/main.py
+职责: 提供 `rag-query` 命令入口，执行参数校验并输出结构化 JSON。
+输入/输出: 输入为 CLI 参数（case/text/top_k 等）；输出为固定字段 JSON。
+依赖: src/retrieval/retriever.py, src/reasoning/tendency_service.py
+变更原因: 对齐 STEP-08，固定对外交互契约。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: qa.acceptance_mapping
+文件路径: tests/test_e2e_v1_baseline.py, tests/test_failure_paths.py
+职责: 建立 PRD 验收标准与自动化测试映射（ACC-01 ~ ACC-05）。
+输入/输出: 输入为系统行为与边界条件；输出为验收通过/失败结果。
+依赖: 全链路模块（ingestion/retrieval/reasoning/cli/infra）
+变更原因: 对齐 STEP-09，保证可验证与可追溯。
+变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
+updated_at: 2026-02-21T08:33:14.6700698+08:00

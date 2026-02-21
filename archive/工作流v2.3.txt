@@ -1,0 +1,224 @@
+﻿- 在文件顶部加一行：status: reference-only, not runtime source of truth。
+- 运行时只认 AGENTS.md 当前版本规则。
+## 0. 阶段边界（必须遵守）
+
+1. Phase A（初始化阶段）：执行第 1-5 节，只产出和校准文档与规则，不进行业务代码实现。
+2. Phase B（执行阶段）：执行第 6-8 节，按 `implementation-plan.md` 逐步实现。
+3. 进入 Phase B 的前提：`memory-bank/prd.md`、`memory-bank/tech-stack.md`、`memory-bank/implementation-plan.md`、`memory-bank/progress.md`、`memory-bank/architecture.md` 均存在且可读。
+4. 在同一会话中，若 Phase A 未完成，不允许进入 Phase B。
+
+## 1. prd.md
+
+1. 先输入意图，然后生成 `prd.md`。
+2. 审查并完善文档，确保符合人类意愿。
+3. 文档可以很基础，目标是让 AI 了解项目结构和意图。
+4. 不要过度工程化，人类后续迭代补充。
+
+## 2. tech-stack.md
+
+1. 让 AI 根据项目推荐“最简单但最稳健”的技术栈。
+2. 人类挑战 AI 避免复杂化选型。
+3. 增加固定小节：`本阶段不引入技术`，明确当前阶段不采用的框架/组件，防止技术膨胀。
+
+## 3. 初始化（规则生成）
+
+1. 使用 `prd.md` 和 `tech-stack.md` 初始化规则。
+2. 人类审查规则，确保强调模块化（多文件）并反对单体大文件。
+3. 人类可手动调整规则与触发条件。
+4. 关键规则必须设为 `Always`。
+
+### 3.1 规则优先级（冲突时裁决）
+
+1. `Always 规则` > `执行流说明` > `示例性语句`。
+2. 若存在冲突，必须按优先级执行，并在输出中明确冲突点与处理结果。
+
+### 3.2 关键术语定义（避免歧义）
+
+1. 小改动：同时满足以下条件才算小改动：
+   - 不修改 `prd.md` 的验收标准。
+   - 不新增/修改公共接口（API、CLI、外部输入输出契约）。
+   - 不改变核心目录结构或模块边界。
+2. 需求变化/重构：满足以下任一条件即判定为需求变化/重构：
+   - 修改 `prd.md` 验收标准或功能边界。
+   - 新增/修改公共接口（API、CLI、外部输入输出契约）。
+   - 调整核心目录结构、模块边界或关键依赖关系。
+3. 主要功能：新增用户可感知能力，或新增主流程入口。
+4. 里程碑：`implementation-plan.md` 中同一 `epic_id` 下全部 step 完成；若未使用 `epic_id`，则以连续 3 个 step 完成判定。
+
+### 3.3 Always 规则（Trigger -> Action -> Output）
+
+1. Trigger: 在编写任何代码之前。  
+   Action: 读取 `memory-bank/architecture.md`、`memory-bank/prd.md`、`memory-bank/implementation-plan.md`、`memory-bank/tech-stack.md`、`memory-bank/progress.md`。  
+   Output: 输出“已读取文件清单 + 当前 step 目标 + 本轮测试计划”。
+
+2. Trigger: 必读文件不存在。  
+   Action: 先创建缺失文件的最小模板，再继续流程。  
+   Output: 输出“缺失文件清单 + 新建模板文件清单”。
+
+3. Trigger: 会话开始或恢复执行。  
+   Action: 从 `memory-bank/progress.md` 选择唯一当前 step：优先 `in_progress`，否则选择 `step_order` 最小的 `todo`。  
+   Output: 输出“current_step_id + 选择依据”。
+
+4. Trigger: 完成 `progress.md` 中一个 step 后。  
+   Action: 更新 `memory-bank/progress.md`。  
+   Output: 记录该 step 的状态、测试结果、人工验证结果、变更摘要。
+
+5. Trigger: 添加主要功能或完成里程碑后。  
+   Action: 更新 `memory-bank/architecture.md`。  
+   Output: 记录模块职责、文件作用、依赖关系变化、变更原因。
+
+6. Trigger: 人类提出新增需求/添加功能/删减功能/重构。  
+   Action: 读取 `memory-bank/` 文档并判断是否需要同步修改。  
+   Output: 输出“需要更新的文档列表 + 修改建议”。
+
+7. Trigger: 发现 rules 可能不适配当前项目。  
+   Action: 先向人类提问确认，再修改规则。  
+   Output: 输出“拟修改规则 + 原因 + 影响范围”。
+
+8. Trigger: 任务被判定为小改动。  
+   Action: 仍需先执行 Always 必读 5 文件；随后在分析阶段优先聚焦 `memory-bank/progress.md`、`memory-bank/implementation-plan.md`、`memory-bank/architecture.md`。  
+   Output: 输出“小改动判定依据 + 本次按小改动流程执行”。
+
+9. Trigger: 任务被判定为需求变化/重构。  
+   Action: 全量读取 `memory-bank/*`。  
+   Output: 输出“需求变化/重构判定依据 + 需要同步更新的文档”。
+
+10. Trigger: 当前 step 未收到“开始下一 step”指令。  
+    Action: 禁止进入下一 step。  
+    Output: 明确停留在当前 step，等待人类确认。
+
+11. Trigger: AI 看到后续 step 内容。  
+    Action: 禁止跨 step 提前实现。  
+    Output: 明确“仅执行当前 step 范围”。
+
+12. Trigger: 出现 blocker（测试无法通过、依赖缺失、需求冲突、权限限制等）。  
+    Action: 立即停止推进并将该 step 标记为 `blocked`，记录解除条件。  
+    Output: 输出“blocker 描述 + 影响范围 + 解除条件 + 建议决策”。
+
+13. Trigger: 人类完成 GitHub commit。  
+    Action: 回填 `memory-bank/progress.md` 的 `commit_ref`。  
+    Output: 输出“已关联 commit_ref”。
+
+14. Trigger: blocker 已解除且经人类确认。  
+    Action: 将当前 step 状态从 `blocked` 更新为 `in_progress`，并更新 `notes` 与 `updated_at`。  
+    Output: 输出“恢复依据 + 恢复后 next_action”。
+
+## 4. implementation-plan.md
+
+1. 基于 `prd.md` 和 `tech-stack.md` 创建详细 `implementation-plan.md`。
+2. 只写清晰、具体的指令，不写代码。
+3. 聚焦基础版本，不覆盖全部功能。
+4. 每个步骤必须小而具体，并包含测试（TDD）。
+
+### 4.1 每个 step 的固定模板（DoD）
+
+1. Step ID
+2. Epic ID（可为空；若使用 Epic 里程碑判定则必填）
+3. 目标（Goal）
+4. 测试（先写失败测试）
+5. 失败测试结果摘要（失败原因/关键断言）
+6. 最小实现（通过测试）
+7. 重构（不改行为）
+8. 完成标准（Done Criteria）
+9. 人工验证方法（Manual Test）
+10. 产出物（修改文件/命令/结果）
+
+## 5. memory-bank
+
+1. 新建 `memory-bank/` 文件夹，包含：  
+   `prd.md`  
+   `tech-stack.md`  
+   `implementation-plan.md`  
+   `progress.md`  
+   `architecture.md`
+
+2. `progress.md` 不再为空，使用最小模板：  
+   `step_id:`  
+   `step_order: <int>`  
+   `step_title:`  
+   `status: todo|in_progress|blocked|done`  
+   `automated_test:`  
+   `manual_test:`  
+   `changes:`  
+   `notes:`  
+   `commit_ref:`  
+   `updated_at:`
+
+3. `architecture.md` 不再为空，使用最小模板：  
+   `模块名称:`  
+   `文件路径:`  
+   `职责:`  
+   `输入/输出:`  
+   `依赖:`  
+   `变更原因:`  
+   `变更记录:`  
+   `updated_at:`
+
+## 6. vibe-coding 基础执行流
+
+1. 初始化后，人类要求：读取 `memory-bank` 所有文档，检查 `implementation-plan.md` 是否清晰，并提出澄清问题直到可执行。
+2. 人类与 AI 迭代完善 `implementation-plan.md`。
+3. 人类：读取 `memory-bank` 中所有文档，编辑 `progress.md` 和 `architecture.md`。
+4. 人类和 AI 共同检查并确认文档以及规则。
+5. 说明：全量读取用于“新会话启动校准”；进入具体 step 后按 3.3 的分级规则执行读取。
+
+开始第一步：  
+根据 rules 读取 `memory-bank` 中的文档并开始第一个 step。严格执行 TDD：先写测试并确认失败，再写最小代码通过测试，然后优化代码并做回归测试。然后输出人工测试步骤与成功判定。人类确认后，输出该 step 的详细改动说明。  
+文档读取范围按 3.3 的分级规则执行：  
+- 小改动按 3.3-8。  
+- 需求变化/重构按 3.3-9。  
+
+Step 完成后的固定顺序：  
+1. 输出失败测试结果摘要（失败原因/关键断言）。  
+2. 自动化测试通过。  
+3. 输出人工测试步骤与成功判定。  
+4. 人类确认测试通过。  
+5. 更新 `memory-bank/progress.md`（状态更新为 `done`；若未提交则 `commit_ref: pending`）。  
+6. 若涉及主要功能或里程碑，更新 `memory-bank/architecture.md`。  
+7. 人类完成 commit 后，回填 `commit_ref`。  
+
+若步骤中出现 blocker：  
+- 立即停止推进，不得进入下一 step。  
+- 将当前 step 在 `progress.md` 标记为 `blocked`，并写明解除条件。  
+- blocker 解除并经人类确认后，将状态从 `blocked` 更新为 `in_progress`，继续当前 step，禁止跳步。  
+
+重要的：  
+未收到“开始下一 step”前，不得进入下一 step。
+
+开始下一 step：  
+为了防止上下文爆炸、保证记忆质量，每次进入下一 step 时使用 `/new` 新开会话。流程与第一步一致：先读取 `memory-bank`（按 3.3 分级规则），再按 `progress.md` 进入当前 step。  
+未收到“开始下一 step”前，不得进入下一 step。  
+重复直到 `implementation-plan.md` 全部完成。
+
+## 7. 添加细节（增量特性）
+
+1. 基础版本完成后，再做性能/效果增强。
+2. 每个增强点单独建文档，命名为：`feature-01-xxx.md`、`feature-02-xxx.md`。
+3. 每个 feature 文档包含简短步骤与测试（TDD）。
+4. 增量实施、增量测试。
+5. 累积多个 feature 后，评估是否增量更新 `memory-bank` 全部文档。
+6. 编号规则：feature 编号全局唯一，不复用、不回填。
+7. 每个 feature 文档必须包含以下字段：
+   - `Intent`
+   - `Scope`
+   - `Steps`
+   - `Tests`
+   - `Impact`（性能、复杂度、依赖变化）
+   - `Docs to update`（需同步更新的 memory-bank 文档）
+   - `Rollback`（如何安全撤销并恢复到前一稳定状态）
+
+## 8. 执行约束（保持可控）
+
+1. 不允许跨 step 提前实现。
+2. 不允许在未确认的规则下继续推进。
+3. 每次输出都应包含当前 step 边界，防止范围漂移。
+4. 优先保证“可验证、可回滚、可解释”。
+5. 每轮输出必须包含：
+   - `current_step_id`
+   - `goal`
+   - `tests_failed_summary`
+   - `tests_passed_summary`
+   - `manual_test_plan`
+   - `next_action`
+   - `blockers(如有)`
+
