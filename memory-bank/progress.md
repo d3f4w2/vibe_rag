@@ -19,3 +19,14 @@ changes: added tests/test_case_scanner.py; added src/ingestion/__init__.py and s
 notes: STEP-02 completed under current-step scope only; no cross-step implementation; architecture update not triggered (not milestone/major feature)
 commit_ref: 71b7ab0
 updated_at: 2026-02-21T17:18:10.0429147+08:00
+
+step_id: STEP-03
+step_order: 3
+step_title: Implement text cleaning for UTF-8 and 0x7F removal
+status: done
+automated_test: conda run -n vibe-rag python -m pytest -k text_cleaner -q -> 3 passed, 5 deselected; conda run -n vibe-rag python -m pytest -q -> 8 passed
+manual_test: user confirmed manual verification passed for control-char cleanup and UTF-8 decode error handling
+changes: added tests/test_text_cleaner.py; added src/ingestion/text_cleaner.py with clean_text/read_and_clean_text and TextCleaningError
+notes: STEP-03 completed under current-step scope only; no cross-step implementation; waiting for commit hash backfill; do not enter STEP-04 without explicit start next step
+commit_ref: pending
+updated_at: 2026-02-21T21:04:54.3045915+08:00

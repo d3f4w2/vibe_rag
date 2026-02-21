@@ -3,3 +3,5 @@ github令牌.txt
 __pycache__/
 *.pyc
 .vscode/
+.pytest_cache/
+.pytest_tmp/
