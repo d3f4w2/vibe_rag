@@ -17,5 +17,5 @@ automated_test: python -m pytest -k case_scanner -q -> 2 passed, 3 deselected; p
 manual_test: user confirmed manual verification passed for valid directory discovery and missing-file error reporting
 changes: added tests/test_case_scanner.py; added src/ingestion/__init__.py and src/ingestion/case_scanner.py; implemented scan_case_directories with ScannedCase/ScanIssue outputs
 notes: STEP-02 completed under current-step scope only; no cross-step implementation; architecture update not triggered (not milestone/major feature)
-commit_ref: pending
-updated_at: 2026-02-21T16:48:04.7207246+08:00
+commit_ref: 71b7ab0
+updated_at: 2026-02-21T17:18:10.0429147+08:00
