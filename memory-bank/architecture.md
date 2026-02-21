@@ -98,3 +98,30 @@ updated_at: 2026-02-21T08:33:14.6700698+08:00
 变更原因: 对齐 STEP-09，保证可验证与可追溯。
 变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
 updated_at: 2026-02-21T08:33:14.6700698+08:00
+
+模块名称: ingestion.report_time_parser
+文件路径: src/ingestion/report_time_parser.py
+职责: 从 PDF 文件名中提取并解析 `YYYYMMDDHHMMSS` 报告时间，输出标准 datetime。
+输入/输出: 输入为 PDF 文件名或路径；输出为 datetime；失败时抛出 ReportTimeParseError。
+依赖: Python datetime、re、pathlib
+变更原因: STEP-04 完成实现，固化报告时间来源并给元数据层提供稳定时间字段。
+变更记录: 2026-02-21 完成 parse_report_time_from_pdf_filename 与错误分类。
+updated_at: 2026-02-21T21:51:48.9186028+08:00
+
+模块名称: ingestion.metadata_store
+文件路径: src/ingestion/metadata_store.py
+职责: 构建 CaseRecord 元数据、写入 JSONL 并支持回读校验。
+输入/输出: 输入为 ScannedCase 与文本字段；输出为标准化 metadata record、写入计数、回读结果列表。
+依赖: src/ingestion/report_time_parser.py、src/models/case_record.py、json、pathlib
+变更原因: STEP-04 完成实现，建立 ingestion 到后续 retrieval 的稳定元数据接口。
+变更记录: 2026-02-21 实现 build_metadata_record/write_metadata_jsonl/read_metadata_jsonl 并通过测试。
+updated_at: 2026-02-21T21:51:48.9186028+08:00
+
+模块名称: milestone.epic_ingestion
+文件路径: memory-bank/progress.md, memory-bank/implementation-plan.md
+职责: 标记 EPIC-INGESTION（STEP-01~STEP-04）完成，作为后续检索阶段起点。
+输入/输出: 输入为 step 完成状态；输出为里程碑达成记录与架构文档同步说明。
+依赖: STEP-01, STEP-02, STEP-03, STEP-04
+变更原因: 满足里程碑触发条件，需要同步 architecture 文档。
+变更记录: 2026-02-21 EPIC-INGESTION 达成并完成 architecture 同步。
+updated_at: 2026-02-21T21:51:48.9186028+08:00

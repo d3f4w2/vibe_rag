@@ -5,3 +5,5 @@ __pycache__/
 .vscode/
 .pytest_cache/
 .pytest_tmp/
+.pytest_tmp*/
+.pytest_tmp_run_*/
