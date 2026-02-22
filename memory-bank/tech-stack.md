@@ -97,3 +97,17 @@ ingestion:
 1. Embedding path: `EMBEDDING_API_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, `EMBEDDING_TIMEOUT_SEC`, `EMBEDDING_MAX_RETRIES`.
 2. Generation path: `GENERATION_API_BASE_URL`, `GENERATION_API_KEY`, `GENERATION_MODEL`, `GENERATION_TIMEOUT_SEC`, `GENERATION_MAX_RETRIES`.
 3. `src/infra/api_client.py` routes `embed_texts` and `generate_reasoning` to different provider endpoints by design.
+
+## 11. Localization & Beginner UX Policy（STEP-10）
+1. 文案策略：
+   - 用户可见内容默认中文优先。
+   - 保留必要英文关键词/错误码，便于日志检索与跨团队排障。
+2. 兼容策略：
+   - 不破坏现有英文接口契约。
+   - 允许新增中英并行参数与提示，但需保证旧调用路径可用。
+3. 测试策略：
+   - 对用户可见报错优先断言“错误码/关键字段/退出码”，降低整句文案耦合。
+   - 文案变更不应引起无关功能回归。
+4. 执行边界（本轮）：
+   - STEP-10 为 docs-only，同步策略不落地代码实现。
+   - 代码与测试实现留待后续实现轮次，在同一策略下推进。

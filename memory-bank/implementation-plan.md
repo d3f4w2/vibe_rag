@@ -283,4 +283,34 @@
 1. 当前文档仅定义执行计划，不代表自动进入任一步骤实现。
 2. 必须由人类显式发出 `start next step` 才允许从当前 step 进入下一 step。
 3. 未收到该指令时，允许做的动作仅限：读取文档、澄清需求、更新计划文本。
-4. `memory-bank/progress.md` 当前保持模板状态，等待人类下条指令后再填入首个执行 step。
+4. 当前执行步以 `memory-bank/progress.md` 为准；STEP-10 已完成 docs-only 文档同步并收口为 `done`。
+
+## 4. Step 10（文档同步门禁，docs-only）
+
+### Step 10
+1. Step ID: `STEP-10`
+2. Epic ID: `EPIC-UX-LOCALIZATION`
+3. 目标（Goal）:
+   - 将当前任务切换为“中文友好 + 新手友好”重构的正式执行入口。
+   - 仅更新 memory-bank 相关文档，锁定后续实现边界与兼容策略。
+4. 测试（先写失败测试）:
+   - 文档步骤，无代码测试；通过一致性审查验证。
+5. 失败测试结果摘要（失败原因/关键断言）:
+   - 不适用（docs-only）。
+6. 最小实现（通过测试）:
+   - 更新 `progress.md`，完成 `STEP-10` 并标记 `done`。
+   - 更新 `implementation-plan.md`、`prd.md`、`tech-stack.md`、`architecture.md` 的 Step10 对齐条目。
+7. 重构（不改行为）:
+   - 统一术语：中文优先 + 英文兼容关键字。
+   - 明确“本轮不改代码”的执行边界，避免跨步实现。
+8. 完成标准（Done Criteria）:
+   - `STEP-10` 在 `progress.md` 中为 `done`。
+   - 相关文档均包含 Step10 目标、范围、兼容与非目标约束。
+   - 未产生 `src/` 或 `tests/` 的行为变更。
+9. 人工验证方法（Manual Test）:
+   - 检查 `progress/implementation-plan/prd/tech-stack/architecture` 术语与范围是否一致。
+   - 检查 `STEP-10` 未越级进入 `STEP-11`。
+10. 产出物（修改文件/命令/结果）:
+   - 文件：`memory-bank/progress.md`、`memory-bank/implementation-plan.md`、`memory-bank/prd.md`、`memory-bank/tech-stack.md`、`memory-bank/architecture.md`
+   - 命令：文档核对（`git diff -- memory-bank/*`）
+   - 结果：完成 Step10 文档同步门禁并收口为 done，不执行代码实现。

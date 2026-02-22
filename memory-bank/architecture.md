@@ -170,3 +170,30 @@ dependencies: src/retrieval/retriever.py, src/reasoning/tendency_service.py, arg
 change_reason: STEP-08 requires a stable external interaction contract aligned with PRD and implementation-plan CLI schema.
 change_record: 2026-02-22 implemented parse_args/_resolve_stain_text/run_query/main, enforced stain input + top_k + image_paths validations, and added UTF-8 stain-file loading path.
 updated_at: 2026-02-22T15:38:17.7809093+08:00
+
+module_name: qa.acceptance_mapping (implemented)
+file_path: tests/test_e2e_v1_baseline.py, tests/test_failure_paths.py, docs/manual-acceptance-v1.md
+responsibility: provide executable PRD acceptance mapping (ACC-01 to ACC-05), regression failure-path coverage, and manual verification checklist for V1 baseline.
+input_output: input=system behaviors from ingestion/retrieval/reasoning/cli/infra layers and simulated error paths; output=deterministic pytest pass/fail signals plus manual acceptance criteria.
+dependencies: src/cli/main.py, src/retrieval/retriever.py, src/reasoning/tendency_service.py, src/infra/api_client.py, pytest.
+change_reason: STEP-09 required complete QA baseline with traceable acceptance-to-test mapping and diagnosable failure-path assertions.
+change_record: 2026-02-22 added ACC baseline e2e tests, failure-path tests (missing input, timeout, empty recall, invalid UTF-8), and manual acceptance checklist; normalized stain-file UTF-8 decode path to argument error.
+updated_at: 2026-02-22T16:06:07.3608517+08:00
+
+module_name: milestone.epic_qa
+file_path: memory-bank/progress.md, memory-bank/implementation-plan.md, memory-bank/architecture.md
+responsibility: mark EPIC-QA completion at STEP-09 and keep progress/architecture milestone state synchronized.
+input_output: input=STEP-09 done status and commit linkage; output=milestone completion trace for release readiness.
+dependencies: STEP-09 deliverables (tests/test_e2e_v1_baseline.py, tests/test_failure_paths.py, docs/manual-acceptance-v1.md).
+change_reason: EPIC-QA milestone reached when STEP-09 moved from in_progress to done.
+change_record: 2026-02-22 recorded milestone completion after commit_ref backfill and status closure.
+updated_at: 2026-02-22T16:06:07.3608517+08:00
+
+module_name: ux.localization_step10 (implemented, docs-only)
+file_path: memory-bank/progress.md, memory-bank/implementation-plan.md, memory-bank/prd.md, memory-bank/tech-stack.md, memory-bank/architecture.md
+responsibility: formalize Chinese-friendly and beginner-friendly refactor scope, compatibility guardrails, and execution gate before code changes.
+input_output: input=user requirement change ("project-wide Chinese-friendly + beginner-friendly"); output=STEP-10 done with synchronized documentation constraints and execution gate.
+dependencies: existing V1 baseline contracts from cli.main, reasoning.tendency_service, and qa.acceptance_mapping.
+change_reason: requirement-change/refactor request required documentation synchronization before implementation.
+change_record: 2026-02-22 created STEP-10 docs-only gate to prevent cross-step implementation and keep memory-bank artifacts aligned; 2026-02-22 completed docs consistency review and closed STEP-10 as done without src/tests behavior changes.
+updated_at: 2026-02-22T16:23:32.7530484+08:00
