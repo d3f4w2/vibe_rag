@@ -41,3 +41,14 @@ changes: added tests/test_metadata_store.py; added src/ingestion/report_time_par
 notes: STEP-04 completed under current-step scope only; milestone EPIC-INGESTION reached; architecture synced; do not enter STEP-05 without explicit start next step
 commit_ref: 88c3023
 updated_at: 2026-02-21T21:57:29.9519960+08:00
+
+step_id: STEP-05
+step_order: 5
+step_title: Build retrieval document object for vectorization input
+status: done
+automated_test: conda run -n vibe-rag python -m pytest -k document_builder -q -> initial expected failure (ModuleNotFoundError: src.retrieval); conda run -n vibe-rag python -m pytest -k document_builder -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 6 passed; conda run -n vibe-rag python -m pytest -k "document_builder or metadata_store" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 (outside sandbox) -> 9 passed, 8 deselected; conda run -n vibe-rag python -m pytest -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 (outside sandbox) -> 17 passed
+manual_test: user confirmed manual verification passed for retrieval document build scenarios (without report_text, with report_text, and invalid stain_text error path)
+changes: added tests/test_document_builder.py; added src/retrieval/__init__.py and src/retrieval/document_builder.py; implemented RetrievalDocument, DocumentBuildError, and builders for single/batch metadata records
+notes: STEP-05 completed under current-step scope only; no cross-step implementation; .gitignore updated to include pytest_tmp_manual/ for clean git stage; waiting for commit hash backfill
+commit_ref: pending
+updated_at: 2026-02-22T13:25:00.2325165+08:00
