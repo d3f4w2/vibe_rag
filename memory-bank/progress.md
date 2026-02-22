@@ -61,5 +61,5 @@ automated_test: conda run -n vibe-rag python -m pytest -k "api_client or retriev
 manual_test: pending human verification for valid API retrieval, invalid API key auth error, and top_k behavior checks
 changes: added tests/test_api_client.py and tests/test_retriever_topk.py; added src/infra/__init__.py and src/infra/api_client.py; added src/retrieval/vector_store_chroma.py and src/retrieval/retriever.py; updated src/retrieval/__init__.py; updated tests/test_case_scanner.py tests/test_text_cleaner.py tests/test_metadata_store.py to use workspace temp dirs for stable pytest execution; removed src/tests __pycache__ directories during cleanup pass
 notes: blocker removed and resumed by confirmed env setup (httpx/chromadb available; EMBEDDING_API_BASE_URL/KEY/MODEL provided); implemented vector_only retrieval path and unified API error mapping within STEP-06 scope only; cleanup request partially blocked by filesystem ACL/permission denial when deleting .pytest_tmp .pytest_tmp_step06 .pytest_tmp_run_20260221 pytest_tmp_manual .pytest_cache (and locked subdirs); unblock conditions = run cleanup with OS-level admin permission or manually take ownership/reset ACL for locked directories, then rerun deletion and verification
-commit_ref: pending
-updated_at: 2026-02-22T14:46:39.5849949+08:00
+commit_ref: a5d5c0f
+updated_at: 2026-02-22T14:48:19.6307051+08:00
