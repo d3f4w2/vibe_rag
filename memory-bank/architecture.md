@@ -128,12 +128,12 @@ updated_at: 2026-02-21T21:51:48.9186028+08:00
 
 module_name: infra.api_client (implemented)
 file_path: src/infra/api_client.py
-responsibility: unify embedding/generation HTTP calls, load env/.env, and map timeout/auth/rate-limit/server errors to typed exceptions.
-input_output: input=text list/prompt; output=embedding vectors/generated text; errors=ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError.
+responsibility: unify embedding/generation HTTP calls, load env/.env, split provider endpoints for embedding and generation, and map timeout/auth/rate-limit/server errors to typed exceptions.
+input_output: input=text list/prompt with provider-specific env config; output=embedding vectors/generated text; errors=ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError.
 dependencies: httpx, os/pathlib; shared by retrieval layer.
-change_reason: STEP-06 required single API adapter boundary so retrieval modules never call HTTP directly.
-change_record: 2026-02-22 implemented embed_texts/generate_reasoning and provider URL normalization for stable real API path.
-updated_at: 2026-02-22T14:13:58.3426562+08:00
+change_reason: STEP-06 required API adapter boundary; 2026-02-22 requirement-change refactor split embedding/generation endpoints to support mixed-vendor model routing.
+change_record: 2026-02-22 implemented embed_texts/generate_reasoning and provider URL normalization for stable real API path; 2026-02-22 refactored to dual-provider config (EMBEDDING_* and GENERATION_*) with independent base_url/api_key/timeout/retries.
+updated_at: 2026-02-22T15:19:19.9193124+08:00
 
 module_name: retrieval.vector_store_chroma (implemented)
 file_path: src/retrieval/vector_store_chroma.py
@@ -152,3 +152,12 @@ dependencies: src/infra/api_client.py, src/retrieval/vector_store_chroma.py, src
 change_reason: STEP-06 required clear orchestration boundary between API client and vector store with no direct HTTP in retrieval business logic.
 change_record: 2026-02-22 implemented VectorOnlyRetriever, RetrieverError, and build_default_vector_only_retriever.
 updated_at: 2026-02-22T14:13:58.3426562+08:00
+
+module_name: reasoning.tendency_service (implemented)
+file_path: src/reasoning/tendency_service.py
+responsibility: decide HSIL/LSIL/Uncertain from retrieval evidence with fixed thresholds, tie handling, and explainable reason output.
+input_output: input=similar_cases list(label/similarity) + top_k; output=tendency decision object (tendency/reason/disclaimer); errors=ValueError for invalid top_k.
+dependencies: retrieval result schema from src/retrieval/retriever.py.
+change_reason: STEP-07 required deterministic tendency decision for ACC-03/ACC-05 with explicit uncertainty boundaries.
+change_record: 2026-02-22 implemented infer_tendency, uncertainty thresholds, tie-to-uncertain rule, and shared disclaimer constant.
+updated_at: 2026-02-22T14:58:03.8394165+08:00

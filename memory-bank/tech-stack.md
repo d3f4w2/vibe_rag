@@ -92,3 +92,8 @@ ingestion:
 1. PDF 处理细化策略：当前仅定义“可选抽取、失败不阻塞主流程”。
 2. CLI 命令命名规范与参数标准：implementation 阶段确定。
 3. 是否在后续增加关键词检索混合召回：feature 阶段评估。
+
+## 10. Provider Env Mapping (Implemented 2026-02-22)
+1. Embedding path: `EMBEDDING_API_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, `EMBEDDING_TIMEOUT_SEC`, `EMBEDDING_MAX_RETRIES`.
+2. Generation path: `GENERATION_API_BASE_URL`, `GENERATION_API_KEY`, `GENERATION_MODEL`, `GENERATION_TIMEOUT_SEC`, `GENERATION_MAX_RETRIES`.
+3. `src/infra/api_client.py` routes `embed_texts` and `generate_reasoning` to different provider endpoints by design.

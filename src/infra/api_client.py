@@ -57,6 +57,15 @@ def _require_env_value(name: str, override: str | None) -> str:
     return value.strip()
 
 
+def _read_optional_env_value(name: str, override: str | None = None) -> str | None:
+    value = override if override is not None else os.getenv(name)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{name} must be a non-empty string when provided.")
+    return value.strip()
+
+
 def _normalize_base_url(base_url: str) -> str:
     normalized = base_url.strip().rstrip("/")
     return _BASE_URL_ALIASES.get(normalized, normalized)
@@ -89,26 +98,65 @@ class ApiClient:
         base_url: str | None = None,
         api_key: str | None = None,
         embedding_model: str | None = None,
+        generation_base_url: str | None = None,
+        generation_api_key: str | None = None,
         generation_model: str | None = None,
         timeout_sec: float | None = None,
         max_retries: int | None = None,
+        generation_timeout_sec: float | None = None,
+        generation_max_retries: int | None = None,
     ) -> None:
         load_dotenv_if_present()
 
         raw_base_url = _require_env_value("EMBEDDING_API_BASE_URL", base_url)
-        self.base_url = _normalize_base_url(raw_base_url)
-        self.api_key = _require_env_value("EMBEDDING_API_KEY", api_key)
+        self.embedding_base_url = _normalize_base_url(raw_base_url)
+        self.embedding_api_key = _require_env_value("EMBEDDING_API_KEY", api_key)
         self.embedding_model = _require_env_value("EMBEDDING_MODEL", embedding_model)
 
-        self.generation_model = generation_model or os.getenv("GENERATION_MODEL")
-        self.timeout_sec = (
+        generation_base_url_value = _read_optional_env_value(
+            "GENERATION_API_BASE_URL",
+            generation_base_url,
+        )
+        self.generation_base_url = (
+            _normalize_base_url(generation_base_url_value)
+            if generation_base_url_value is not None
+            else None
+        )
+        self.generation_api_key = _read_optional_env_value(
+            "GENERATION_API_KEY",
+            generation_api_key,
+        )
+        self.generation_model = _read_optional_env_value(
+            "GENERATION_MODEL",
+            generation_model,
+        )
+
+        self.embedding_timeout_sec = (
             timeout_sec if timeout_sec is not None else _read_float_env("EMBEDDING_TIMEOUT_SEC", 30.0)
         )
-        self.max_retries = (
+        self.embedding_max_retries = (
             max_retries if max_retries is not None else _read_int_env("EMBEDDING_MAX_RETRIES", 3)
         )
-        if self.max_retries <= 0:
-            raise ValueError("max_retries must be a positive integer.")
+        self.generation_timeout_sec = (
+            generation_timeout_sec
+            if generation_timeout_sec is not None
+            else _read_float_env("GENERATION_TIMEOUT_SEC", 60.0)
+        )
+        self.generation_max_retries = (
+            generation_max_retries
+            if generation_max_retries is not None
+            else _read_int_env("GENERATION_MAX_RETRIES", 3)
+        )
+        if self.embedding_max_retries <= 0:
+            raise ValueError("EMBEDDING_MAX_RETRIES must be a positive integer.")
+        if self.generation_max_retries <= 0:
+            raise ValueError("GENERATION_MAX_RETRIES must be a positive integer.")
+
+        # Backward-compatible aliases for existing callers.
+        self.base_url = self.embedding_base_url
+        self.api_key = self.embedding_api_key
+        self.timeout_sec = self.embedding_timeout_sec
+        self.max_retries = self.embedding_max_retries
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         if not isinstance(texts, list) or len(texts) == 0:
@@ -121,20 +169,44 @@ class ApiClient:
             "model": self.embedding_model,
             "input": texts,
         }
-        response_json = self._post_json("/embeddings", payload)
+        response_json = self._post_json(
+            "/embeddings",
+            payload,
+            base_url=self.embedding_base_url,
+            api_key=self.embedding_api_key,
+            timeout_sec=self.embedding_timeout_sec,
+            max_retries=self.embedding_max_retries,
+        )
         return self._parse_embedding_response(response_json, expected_count=len(texts))
 
     def generate_reasoning(self, prompt: str) -> str:
         if not isinstance(prompt, str) or not prompt.strip():
             raise ValueError("prompt must be a non-empty string.")
-        if not self.generation_model:
-            raise ValueError("GENERATION_MODEL is required for generate_reasoning.")
+        generation_base_url = _require_env_value(
+            "GENERATION_API_BASE_URL",
+            self.generation_base_url,
+        )
+        generation_api_key = _require_env_value(
+            "GENERATION_API_KEY",
+            self.generation_api_key,
+        )
+        generation_model = _require_env_value(
+            "GENERATION_MODEL",
+            self.generation_model,
+        )
 
         payload = {
-            "model": self.generation_model,
+            "model": generation_model,
             "messages": [{"role": "user", "content": prompt}],
         }
-        response_json = self._post_json("/chat/completions", payload)
+        response_json = self._post_json(
+            "/chat/completions",
+            payload,
+            base_url=_normalize_base_url(generation_base_url),
+            api_key=generation_api_key,
+            timeout_sec=self.generation_timeout_sec,
+            max_retries=self.generation_max_retries,
+        )
         choices = response_json.get("choices")
         if not isinstance(choices, list) or len(choices) == 0:
             raise ApiResponseError("generation response missing choices.")
@@ -152,22 +224,31 @@ class ApiClient:
             raise ApiResponseError("generation response missing message content.")
         return content
 
-    def _post_json(self, endpoint: str, payload: dict[str, object]) -> dict[str, object]:
-        url = f"{self.base_url}{endpoint}"
+    def _post_json(
+        self,
+        endpoint: str,
+        payload: dict[str, object],
+        *,
+        base_url: str,
+        api_key: str,
+        timeout_sec: float,
+        max_retries: int,
+    ) -> dict[str, object]:
+        url = f"{base_url}{endpoint}"
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 
-        for attempt in range(1, self.max_retries + 1):
+        for attempt in range(1, max_retries + 1):
             try:
-                with httpx.Client(timeout=self.timeout_sec) as client:
+                with httpx.Client(timeout=timeout_sec) as client:
                     response = client.post(url, json=payload, headers=headers)
             except httpx.TimeoutException as exc:
-                if attempt < self.max_retries:
+                if attempt < max_retries:
                     continue
                 raise ApiTimeoutError(
-                    f"request timed out after {self.max_retries} attempts: {url}"
+                    f"request timed out after {max_retries} attempts: {url}"
                 ) from exc
             except httpx.HTTPError as exc:
                 raise ApiResponseError(f"http request failed: {url}") from exc
@@ -175,7 +256,7 @@ class ApiClient:
             self._raise_for_status(response)
             return self._parse_json_object(response)
 
-        raise ApiTimeoutError(f"request timed out after {self.max_retries} attempts: {url}")
+        raise ApiTimeoutError(f"request timed out after {max_retries} attempts: {url}")
 
     @staticmethod
     def _raise_for_status(response: httpx.Response) -> None:
