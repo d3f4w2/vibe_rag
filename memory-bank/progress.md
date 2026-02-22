@@ -74,3 +74,14 @@ changes: added tests/test_tendency_service.py; added src/reasoning/__init__.py a
 notes: completed TDD red->green->refactor within STEP-07 scope only; integrated requirement-change refactor for dual-provider API routing requested by user; step closed by human confirmation and commit backfill; do not enter STEP-08 without explicit start next step
 commit_ref: 3d46362
 updated_at: 2026-02-22T15:25:49.8180285+08:00
+
+step_id: STEP-08
+step_order: 8
+step_title: Provide local CLI entry with structured JSON output
+status: in_progress
+automated_test: conda run -n vibe-rag python -m pytest -k cli_main -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> expected failure (ModuleNotFoundError: src.cli); conda run -n vibe-rag python -m pytest -k cli_main -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 6 passed, 35 deselected; conda run -n vibe-rag python -m pytest -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 41 passed
+manual_test: pending human confirmation for CLI success path and argument-error path
+changes: added tests/test_cli_main.py; added src/cli/__init__.py and src/cli/main.py; implemented CLI argument validation (stain input required, top_k positive, image_paths max 5), stain-file UTF-8 loading, retrieval+tendency orchestration, structured JSON output with meta fields, and deterministic exit codes (argument=2 runtime=1)
+notes: STEP-08 strict TDD red->green->refactor completed within current-step scope only; waiting for human manual verification before marking done
+commit_ref: pending
+updated_at: 2026-02-22T15:38:17.7809093+08:00

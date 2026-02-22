@@ -161,3 +161,12 @@ dependencies: retrieval result schema from src/retrieval/retriever.py.
 change_reason: STEP-07 required deterministic tendency decision for ACC-03/ACC-05 with explicit uncertainty boundaries.
 change_record: 2026-02-22 implemented infer_tendency, uncertainty thresholds, tie-to-uncertain rule, and shared disclaimer constant.
 updated_at: 2026-02-22T14:58:03.8394165+08:00
+
+module_name: cli.main (implemented)
+file_path: src/cli/main.py
+responsibility: provide local rag-query CLI entry, validate minimal query arguments, orchestrate retrieval+tendency inference, and emit structured JSON output.
+input_output: input=CLI args (--case-id, --stain-text/--stain-file, --report-text, --image-paths, --top-k); output=JSON payload with similar_cases/tendency/reason/disclaimer/meta and deterministic exit codes (0 success, 2 argument error, 1 runtime error).
+dependencies: src/retrieval/retriever.py, src/reasoning/tendency_service.py, argparse, json, pathlib.
+change_reason: STEP-08 requires a stable external interaction contract aligned with PRD and implementation-plan CLI schema.
+change_record: 2026-02-22 implemented parse_args/_resolve_stain_text/run_query/main, enforced stain input + top_k + image_paths validations, and added UTF-8 stain-file loading path.
+updated_at: 2026-02-22T15:38:17.7809093+08:00
