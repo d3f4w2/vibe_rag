@@ -50,5 +50,5 @@ automated_test: conda run -n vibe-rag python -m pytest -k document_builder -q ->
 manual_test: user confirmed manual verification passed for retrieval document build scenarios (without report_text, with report_text, and invalid stain_text error path)
 changes: added tests/test_document_builder.py; added src/retrieval/__init__.py and src/retrieval/document_builder.py; implemented RetrievalDocument, DocumentBuildError, and builders for single/batch metadata records
 notes: STEP-05 completed under current-step scope only; no cross-step implementation; .gitignore updated to include pytest_tmp_manual/ for clean git stage; waiting for commit hash backfill
-commit_ref: pending
-updated_at: 2026-02-22T13:25:00.2325165+08:00
+commit_ref: 1c8cee7
+updated_at: 2026-02-22T13:28:38.8338479+08:00
