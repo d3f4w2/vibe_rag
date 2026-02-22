@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 from src.ingestion.case_scanner import scan_case_directories
 
@@ -17,11 +18,18 @@ def _create_complete_case(data_root: Path, label: str, case_id: str) -> Path:
     return case_dir
 
 
-def test_scan_case_directories_discovers_valid_cases_with_labels(tmp_path: Path) -> None:
-    _create_complete_case(tmp_path, "HSIL", "CASE-H-001")
-    _create_complete_case(tmp_path, "LSIL", "CASE-L-001")
+def _workspace_tmp_dir() -> Path:
+    root = Path("pytest_tmp_manual") / "step06_case_scanner" / uuid4().hex
+    root.mkdir(parents=True, exist_ok=True)
+    return root
 
-    cases, errors = scan_case_directories(tmp_path)
+
+def test_scan_case_directories_discovers_valid_cases_with_labels() -> None:
+    tmp_root = _workspace_tmp_dir()
+    _create_complete_case(tmp_root, "HSIL", "CASE-H-001")
+    _create_complete_case(tmp_root, "LSIL", "CASE-L-001")
+
+    cases, errors = scan_case_directories(tmp_root)
 
     assert errors == []
     assert {(case.case_id, case.label) for case in cases} == {
@@ -41,13 +49,14 @@ def test_scan_case_directories_discovers_valid_cases_with_labels(tmp_path: Path)
     assert Path(case_h.report_pdf_path).suffix == ".pdf"
 
 
-def test_scan_case_directories_reports_missing_required_files(tmp_path: Path) -> None:
-    bad_case_dir = tmp_path / "HSIL" / "CASE-BAD-001"
+def test_scan_case_directories_reports_missing_required_files() -> None:
+    tmp_root = _workspace_tmp_dir()
+    bad_case_dir = tmp_root / "HSIL" / "CASE-BAD-001"
     bad_case_dir.mkdir(parents=True, exist_ok=True)
     for file_name in ("1.jpg", "2.jpg", "4.jpg", "5.jpg"):
         (bad_case_dir / file_name).write_bytes(b"jpg")
 
-    cases, errors = scan_case_directories(tmp_path)
+    cases, errors = scan_case_directories(tmp_root)
 
     assert cases == []
     assert len(errors) == 1

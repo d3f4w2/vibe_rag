@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
@@ -15,6 +16,12 @@ from src.ingestion.report_time_parser import (
     ReportTimeParseError,
     parse_report_time_from_pdf_filename,
 )
+
+
+def _workspace_tmp_dir() -> Path:
+    root = Path("pytest_tmp_manual") / "step06_metadata_store" / uuid4().hex
+    root.mkdir(parents=True, exist_ok=True)
+    return root
 
 
 def test_parse_report_time_from_pdf_filename_parses_yyyymmddhhmmss() -> None:
@@ -36,7 +43,8 @@ def test_parse_report_time_from_pdf_filename_raises_diagnostic_error() -> None:
     assert filename in error_text
 
 
-def test_metadata_jsonl_roundtrip_contains_required_fields(tmp_path: Path) -> None:
+def test_metadata_jsonl_roundtrip_contains_required_fields() -> None:
+    tmp_path = _workspace_tmp_dir()
     scanned_case = ScannedCase(
         case_id="CASE-001",
         label="HSIL",

@@ -125,3 +125,30 @@ updated_at: 2026-02-21T21:51:48.9186028+08:00
 变更原因: 满足里程碑触发条件，需要同步 architecture 文档。
 变更记录: 2026-02-21 EPIC-INGESTION 达成并完成 architecture 同步。
 updated_at: 2026-02-21T21:51:48.9186028+08:00
+
+module_name: infra.api_client (implemented)
+file_path: src/infra/api_client.py
+responsibility: unify embedding/generation HTTP calls, load env/.env, and map timeout/auth/rate-limit/server errors to typed exceptions.
+input_output: input=text list/prompt; output=embedding vectors/generated text; errors=ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError.
+dependencies: httpx, os/pathlib; shared by retrieval layer.
+change_reason: STEP-06 required single API adapter boundary so retrieval modules never call HTTP directly.
+change_record: 2026-02-22 implemented embed_texts/generate_reasoning and provider URL normalization for stable real API path.
+updated_at: 2026-02-22T14:13:58.3426562+08:00
+
+module_name: retrieval.vector_store_chroma (implemented)
+file_path: src/retrieval/vector_store_chroma.py
+responsibility: manage Chroma persistent collection, upsert embedded retrieval documents, and query Top-K with similarity + source metadata.
+input_output: input=RetrievalDocument list + vectors/query vector; output=similar case records with case_id/label/similarity/evidence/metadata.
+dependencies: chromadb, src/retrieval/document_builder.py, src/infra/api_client.load_dotenv_if_present.
+change_reason: STEP-06 needed vector_only persistence and deterministic Top-K retrieval in local runtime.
+change_record: 2026-02-22 implemented ChromaVectorStore + VectorStoreError and normalized vector validation helpers.
+updated_at: 2026-02-22T14:13:58.3426562+08:00
+
+module_name: retrieval.retriever (implemented)
+file_path: src/retrieval/retriever.py
+responsibility: orchestrate vector-only flow (index -> embed -> upsert -> query -> return structured similar_cases).
+input_output: input=query_text/top_k and RetrievalDocument list for indexing; output=Top-K retrieval objects for downstream reasoning.
+dependencies: src/infra/api_client.py, src/retrieval/vector_store_chroma.py, src/retrieval/document_builder.py.
+change_reason: STEP-06 required clear orchestration boundary between API client and vector store with no direct HTTP in retrieval business logic.
+change_record: 2026-02-22 implemented VectorOnlyRetriever, RetrieverError, and build_default_vector_only_retriever.
+updated_at: 2026-02-22T14:13:58.3426562+08:00

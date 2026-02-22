@@ -52,3 +52,14 @@ changes: added tests/test_document_builder.py; added src/retrieval/__init__.py a
 notes: STEP-05 completed under current-step scope only; no cross-step implementation; .gitignore updated to include pytest_tmp_manual/ for clean git stage; waiting for commit hash backfill
 commit_ref: 1c8cee7
 updated_at: 2026-02-22T13:28:38.8338479+08:00
+
+step_id: STEP-06
+step_order: 6
+step_title: Implement vector-only retrieval pipeline with API client and Chroma Top-K
+status: blocked
+automated_test: conda run -n vibe-rag python -m pytest -k "api_client or retriever_topk" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> initial expected failure (ModuleNotFoundError: src.infra, src.retrieval.retriever); conda run -n vibe-rag python -m pytest -k "api_client or retriever_topk" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 9 passed, 17 deselected; conda run -n vibe-rag python -m pytest -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 26 passed; conda run -n vibe-rag python -m pytest -k "api_client or retriever_topk" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 9 passed, 17 deselected
+manual_test: pending human verification for valid API retrieval, invalid API key auth error, and top_k behavior checks
+changes: added tests/test_api_client.py and tests/test_retriever_topk.py; added src/infra/__init__.py and src/infra/api_client.py; added src/retrieval/vector_store_chroma.py and src/retrieval/retriever.py; updated src/retrieval/__init__.py; updated tests/test_case_scanner.py tests/test_text_cleaner.py tests/test_metadata_store.py to use workspace temp dirs for stable pytest execution; removed src/tests __pycache__ directories during cleanup pass
+notes: blocker removed and resumed by confirmed env setup (httpx/chromadb available; EMBEDDING_API_BASE_URL/KEY/MODEL provided); implemented vector_only retrieval path and unified API error mapping within STEP-06 scope only; cleanup request partially blocked by filesystem ACL/permission denial when deleting .pytest_tmp .pytest_tmp_step06 .pytest_tmp_run_20260221 pytest_tmp_manual .pytest_cache (and locked subdirs); unblock conditions = run cleanup with OS-level admin permission or manually take ownership/reset ACL for locked directories, then rerun deletion and verification
+commit_ref: pending
+updated_at: 2026-02-22T14:46:39.5849949+08:00
