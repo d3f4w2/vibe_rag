@@ -78,10 +78,21 @@ updated_at: 2026-02-22T15:25:49.8180285+08:00
 step_id: STEP-08
 step_order: 8
 step_title: Provide local CLI entry with structured JSON output
-status: in_progress
+status: done
 automated_test: conda run -n vibe-rag python -m pytest -k cli_main -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> expected failure (ModuleNotFoundError: src.cli); conda run -n vibe-rag python -m pytest -k cli_main -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 6 passed, 35 deselected; conda run -n vibe-rag python -m pytest -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 41 passed
 manual_test: pending human confirmation for CLI success path and argument-error path
 changes: added tests/test_cli_main.py; added src/cli/__init__.py and src/cli/main.py; implemented CLI argument validation (stain input required, top_k positive, image_paths max 5), stain-file UTF-8 loading, retrieval+tendency orchestration, structured JSON output with meta fields, and deterministic exit codes (argument=2 runtime=1)
-notes: STEP-08 strict TDD red->green->refactor completed within current-step scope only; waiting for human manual verification before marking done
+notes: STEP-08 strict TDD red->green->refactor completed within current-step scope only; waiting for human manual verification before marking done; commit_ref backfilled from human-provided commit [main 58de3fc]
+commit_ref: 58de3fc
+updated_at: 2026-02-22T15:41:43.0707509+08:00
+
+step_id: STEP-09
+step_order: 9
+step_title: Complete V1 regression and failure-path coverage baseline
+status: in_progress
+automated_test: conda run -n vibe-rag python -m pytest -k "e2e_v1_baseline or failure_paths" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> expected failure (1 failed, 9 passed; invalid UTF-8 stain-file returned runtime code 1 instead of argument code 2); conda run -n vibe-rag python -m pytest -k "e2e_v1_baseline or failure_paths" -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 10 passed, 41 deselected; conda run -n vibe-rag python -m pytest -q --ignore pytest_tmp_manual --ignore .pytest_tmp --ignore .pytest_tmp_run_20260221 -> 51 passed
+manual_test: pending human confirmation using docs/manual-acceptance-v1.md (M1-M4)
+changes: added tests/test_e2e_v1_baseline.py and tests/test_failure_paths.py; updated src/cli/main.py to map stain-file UTF-8 decode failure into CliArgumentError; added docs/manual-acceptance-v1.md
+notes: STEP-09 strict TDD red->green->regression completed within current-step scope only; waiting for human manual verification before marking done; no git operations performed
 commit_ref: pending
-updated_at: 2026-02-22T15:38:17.7809093+08:00
+updated_at: 2026-02-22T15:54:41.5317839+08:00

@@ -85,6 +85,10 @@ def _resolve_stain_text(args: argparse.Namespace) -> str:
     stain_file_path = Path(args.stain_file)
     try:
         content = stain_file_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise CliArgumentError(
+            f"failed to decode --stain-file '{args.stain_file}' as UTF-8 text."
+        ) from exc
     except OSError as exc:
         raise CliArgumentError(
             f"failed to read --stain-file '{args.stain_file}': {exc}"
