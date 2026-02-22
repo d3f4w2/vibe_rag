@@ -49,7 +49,7 @@ updated_at: 2026-02-21T08:33:14.6700698+08:00
 文件路径: src/infra/api_client.py
 职责: 统一封装 embedding/generation API 调用、超时重试与错误映射。
 输入/输出: 输入为文本或 prompt；输出为向量结果或生成文本；失败时抛出统一错误类型。
-依赖: httpx、pydantic-settings
+依赖: httpx、os/pathlib
 变更原因: 对齐 STEP-06 决策锁定，避免业务层直接访问 HTTP。
 变更记录: 2026-02-21 workflow-init 初始化计划级模块基线。
 updated_at: 2026-02-21T08:33:14.6700698+08:00

@@ -105,5 +105,5 @@ automated_test: not run (docs-only step)
 manual_test: 已完成 progress/implementation-plan/prd/tech-stack/architecture 与 AGENTS/manual-acceptance 的文档一致性复核；术语、范围、兼容约束与非目标保持一致
 changes: 完成 STEP-10 docs-only 收口；同步更新 memory-bank/progress.md、docs/manual-acceptance-v1.md、AGENTS.md 的中文友好文案，并保持关键 token/键名兼容
 notes: STEP-10 在当前 step 范围内收口完成；记录 EPIC-UX-LOCALIZATION 文档里程碑；未修改 src/ 或 tests/ 行为实现；未收到明确指令前不得进入 STEP-11
-commit_ref: pending
-updated_at: 2026-02-22T16:30:32.9111855+08:00
+commit_ref: 970babb
+updated_at: 2026-02-22T16:36:01.3416054+08:00

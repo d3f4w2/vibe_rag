@@ -8,3 +8,5 @@ __pycache__/
 .pytest_tmp*/
 .pytest_tmp_run_*/
 pytest_tmp_manual/
+vactor/
+
