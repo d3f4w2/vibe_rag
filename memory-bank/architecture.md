@@ -1,4 +1,41 @@
-# Architecture（V2 文档重构版，含中文图注）
+# Architecture（V2，v3.1 对齐）
+
+## 文档目的
+1. 描述系统当前架构、目标架构与关键链路。
+2. 明确模块职责与依赖边界，减少跨角色理解偏差。
+3. 为需求评审、重构评估、里程碑回填提供依据。
+
+## 范围内
+1. 当前系统上下文图、关键时序图、V2 目标架构图。
+2. 模块职责总表（文件路径、输入输出、依赖与错误类型）。
+3. 架构层面的变更记录与原因说明。
+
+## 范围外
+1. 临时执行日志、测试过程与命令清单。
+2. 具体实现细节代码与参数调优细节。
+3. 非架构层面的流程治理记录（由 `progress.md` 承担）。
+
+## 真源文档
+1. `C:\Users\ljh\Desktop\workflow\工作流v3.1.txt`
+
+## 依赖文档
+1. `memory-bank/prd.md`
+2. `memory-bank/tech-stack.md`
+3. `memory-bank/implementation-plan.md`
+4. `memory-bank/progress.md`
+
+## 更新触发
+1. 完成主要功能或里程碑后。
+2. 模块边界、核心依赖、主流程入口发生变化时。
+3. 需求变化/重构导致职责映射变化时。
+
+## 验收锚点
+1. 图中节点与模块职责表一一对应。
+2. 图内节点均包含“脚本路径 + 中文职责短注释”。
+3. 目标架构与 `tech-stack.md` 的迁移目标一致。
+
+## 更新时间
+2026-02-23
 
 ## 1. 目标与原则
 1. 目标：让 AI 与人类都能快速看懂“入口 -> 检索 -> 判定 -> 输出”。
@@ -122,14 +159,13 @@ flowchart LR
 | infra.api_client | `src/infra/api_client.py` | API 调用、重试、错误映射 | texts/prompt | embeddings/text | httpx, env | `ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError` |
 | cli.main | `src/cli/main.py` | 参数校验、流程编排、结构化输出 | CLI args | JSON + exit code | retriever, tendency | `CliArgumentError` |
 
-## 6. STEP-11 修订记录（本轮）
-1. 变更类型：需求变化/重构（docs-only）。
-2. 变更内容：
-   - 三张架构图全部改为“节点内中文职责注释”。
+## 6. 变更记录（关键里程碑）
+1. STEP-11（docs-only）：
+   - 三张架构图改为“节点内中文职责注释”。
    - 通过分层子图明确脚本位置与职责边界。
-3. 变更原因：
-   - 提升人类可读性，降低跨角色沟通成本。
-4. 执行边界：
+   - 人类提交 `commit_ref: c44e8e7`（2026-02-23T09:14:36+08:00）。
+2. 本轮独立任务（工作流 v3.1 对齐）：
+   - 增补 v3.1 通用模板字段。
+   - 对齐状态机、门禁与文档边界语义。
+3. 执行边界：
    - only executing current step scope.
-5. updated_at: 2026-02-23
-
