@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,9 @@ class VectorStoreError(ValueError):
 
 
 class ChromaVectorStore:
+    _ENCODED_METADATA_KEYS_FIELD = "rag_encoded_json_keys"
+    _LEGACY_ENCODED_METADATA_KEYS_FIELD = "__rag_encoded_json_keys"
+
     def __init__(
         self,
         *,
@@ -67,7 +71,12 @@ class ChromaVectorStore:
 
             ids.append(document.doc_id)
             contents.append(document.content)
-            metadatas.append(dict(document.metadata))
+            metadatas.append(
+                self._sanitize_metadata_for_chroma(
+                    dict(document.metadata),
+                    field_name=f"documents[{idx}].metadata",
+                )
+            )
             normalized_embeddings.append(self._normalize_vector(embeddings[idx], f"embeddings[{idx}]"))
 
         try:
@@ -104,7 +113,11 @@ class ChromaVectorStore:
 
         results: list[dict[str, object]] = []
         for idx, document in enumerate(documents):
-            metadata = metadatas[idx] if idx < len(metadatas) and isinstance(metadatas[idx], dict) else {}
+            metadata = (
+                self._restore_metadata_from_chroma(metadatas[idx])
+                if idx < len(metadatas) and isinstance(metadatas[idx], dict)
+                else {}
+            )
             distance = float(distances[idx]) if idx < len(distances) else 1.0
             similarity = max(0.0, min(1.0, 1.0 - distance))
             doc_id = ids[idx] if idx < len(ids) else ""
@@ -142,3 +155,74 @@ class ChromaVectorStore:
                 raise VectorStoreError(f"{field_name}[{idx}] must be numeric.")
             normalized.append(float(value))
         return normalized
+
+    @classmethod
+    def _sanitize_metadata_for_chroma(
+        cls,
+        metadata: dict[str, Any],
+        *,
+        field_name: str,
+    ) -> dict[str, Any]:
+        sanitized: dict[str, Any] = {}
+        encoded_keys: list[str] = []
+
+        for key, value in metadata.items():
+            if not isinstance(key, str):
+                raise VectorStoreError(f"{field_name} keys must be strings.")
+            if key in {cls._ENCODED_METADATA_KEYS_FIELD, cls._LEGACY_ENCODED_METADATA_KEYS_FIELD}:
+                raise VectorStoreError(
+                    f"{field_name} cannot contain reserved key {key}."
+                )
+
+            if cls._is_chroma_scalar(value):
+                sanitized[key] = value
+                continue
+
+            try:
+                sanitized[key] = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+            except TypeError as exc:
+                raise VectorStoreError(
+                    f"{field_name}.{key} must be JSON-serializable when non-scalar."
+                ) from exc
+            encoded_keys.append(key)
+
+        if encoded_keys:
+            sanitized[cls._ENCODED_METADATA_KEYS_FIELD] = json.dumps(
+                encoded_keys,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        return sanitized
+
+    @classmethod
+    def _restore_metadata_from_chroma(cls, metadata: dict[str, Any]) -> dict[str, Any]:
+        restored = dict(metadata)
+        encoded_keys_raw = restored.pop(cls._ENCODED_METADATA_KEYS_FIELD, None)
+        if encoded_keys_raw is None:
+            encoded_keys_raw = restored.pop(cls._LEGACY_ENCODED_METADATA_KEYS_FIELD, None)
+        if not isinstance(encoded_keys_raw, str):
+            return restored
+
+        try:
+            encoded_keys = json.loads(encoded_keys_raw)
+        except json.JSONDecodeError:
+            return restored
+        if not isinstance(encoded_keys, list):
+            return restored
+
+        for key in encoded_keys:
+            if not isinstance(key, str):
+                continue
+            raw_value = restored.get(key)
+            if not isinstance(raw_value, str):
+                continue
+            try:
+                restored[key] = json.loads(raw_value)
+            except json.JSONDecodeError:
+                continue
+
+        return restored
+
+    @staticmethod
+    def _is_chroma_scalar(value: object) -> bool:
+        return value is None or isinstance(value, (str, int, float, bool))

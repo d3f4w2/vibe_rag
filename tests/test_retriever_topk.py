@@ -93,3 +93,7 @@ def test_retrieve_top_k_includes_similarity_and_source_metadata() -> None:
     assert metadata["label"] == "HSIL"
     assert "report_pdf_path" in metadata
     assert "stain_text_path" in metadata
+    assert metadata["image_paths"] == [
+        "data/HSIL/CASE-A/1.jpg",
+        "data/HSIL/CASE-A/2.jpg",
+    ]

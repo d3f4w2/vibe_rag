@@ -77,22 +77,15 @@ def _build_vector_retriever(tmp_path: Path) -> VectorOnlyRetriever:
     return retriever
 
 
-def test_acc_01_valid_input_returns_top_k_similar_cases() -> None:
+def test_acc_01_vector_retrieval_smoke_returns_ranked_traceable_results() -> None:
     retriever = _build_vector_retriever(_workspace_tmp_dir())
 
     results = retriever.retrieve("query-hsil", top_k=2)
+    top_hit = results[0]
 
     assert len(results) == 2
     assert [item["case_id"] for item in results] == ["CASE-A", "CASE-B"]
     assert results[0]["similarity"] >= results[1]["similarity"]
-
-
-def test_acc_02_result_contains_traceable_evidence_and_source_fields() -> None:
-    retriever = _build_vector_retriever(_workspace_tmp_dir())
-
-    results = retriever.retrieve("query-hsil", top_k=1)
-    top_hit = results[0]
-
     assert isinstance(top_hit["evidence"], str)
     assert top_hit["evidence"]
     assert top_hit["case_id"] == "CASE-A"
@@ -102,6 +95,10 @@ def test_acc_02_result_contains_traceable_evidence_and_source_fields() -> None:
     assert metadata["label"] == "HSIL"
     assert "report_pdf_path" in metadata
     assert "stain_text_path" in metadata
+    assert metadata["image_paths"] == [
+        "data/HSIL/CASE-A/1.jpg",
+        "data/HSIL/CASE-A/2.jpg",
+    ]
 
 
 def test_acc_03_cli_output_contains_tendency_reason_and_disclaimer(capsys) -> None:

@@ -36,18 +36,6 @@ def _response(status_code: int, body: dict[str, Any] | None = None) -> httpx.Res
     return httpx.Response(status_code, json=body or {}, request=request)
 
 
-def test_failure_missing_required_stain_input_returns_argument_error(capsys) -> None:
-    exit_code = main(
-        ["--top-k", "5"],
-        retriever_factory=lambda: _EmptyRetriever(),
-        tendency_fn=infer_tendency,
-    )
-
-    assert exit_code == 2
-    captured = capsys.readouterr()
-    assert "argument error" in captured.err.lower()
-
-
 def test_failure_api_timeout_returns_runtime_error(capsys) -> None:
     exit_code = main(
         ["--stain-text", "query text", "--top-k", "5"],

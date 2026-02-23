@@ -153,7 +153,7 @@ flowchart LR
 | ingestion.report_time_parser | `src/ingestion/report_time_parser.py` | 解析 PDF 文件名报告时间 | filename/path | datetime | `datetime`/`re` | `ReportTimeParseError` |
 | ingestion.metadata_store | `src/ingestion/metadata_store.py` | 构建并读写 JSONL 元数据 | scanned case + text | metadata rows | parser, case_record | 元数据读写错误 |
 | retrieval.document_builder | `src/retrieval/document_builder.py` | 构建检索文档对象 | metadata + text | retrieval documents | ingestion metadata | `DocumentBuildError` |
-| retrieval.vector_store_chroma | `src/retrieval/vector_store_chroma.py` | Chroma upsert/query | vectors/docs | top-k similar cases | chromadb | `VectorStoreError` |
+| retrieval.vector_store_chroma | `src/retrieval/vector_store_chroma.py` | Chroma upsert/query + metadata 非标量字段编码恢复 | vectors/docs | top-k similar cases | chromadb | `VectorStoreError` |
 | retrieval.retriever | `src/retrieval/retriever.py` | 编排向量检索主链路 | query/top_k | similar_cases | api_client, vector_store | `RetrieverError` |
 | reasoning.tendency_service | `src/reasoning/tendency_service.py` | 倾向判定与理由输出 | similar_cases | tendency payload | retrieval schema | `ValueError` |
 | infra.api_client | `src/infra/api_client.py` | API 调用、重试、错误映射 | texts/prompt | embeddings/text | httpx, env | `ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError` |
@@ -167,5 +167,13 @@ flowchart LR
 2. 本轮独立任务（工作流 v3.1 对齐）：
    - 增补 v3.1 通用模板字段。
    - 对齐状态机、门禁与文档边界语义。
-3. 执行边界：
+3. STEP-12（EPIC-V2-LANGCHAIN-DESIGN，docs-only）：
+   - 新增 `memory-bank/feature-12-langchain-design.md`，冻结 Retriever Adapter 接口、数据流、错误映射与兼容性约束。
+   - 不引入运行时代码变更，不改变对外 CLI 契约与错误分层语义。
+   - 人类提交 `commit_ref: ce60db5`（2026-02-23T11:35:29+08:00）。
+4. STEP-13（EPIC-V2-TEST-POLICY）：
+   - 新增 `memory-bank/feature-13-test-policy.md`，沉淀边界条件矩阵（保留/合并/删除）与回归映射。
+   - 在 `src/retrieval/vector_store_chroma.py` 增加 metadata 非标量字段（list/dict）编码与查询恢复能力，修复 Chroma scalar 限制导致的失败路径。
+   - `vibe-rag` 环境下回归通过：`conda run -n vibe-rag python -m pytest -q tests`（51 passed）。
+5. 执行边界：
    - only executing current step scope.
