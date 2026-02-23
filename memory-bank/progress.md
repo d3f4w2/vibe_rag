@@ -54,8 +54,8 @@
 5. 独立任务模式下输出 `current_step_id: N/A（独立任务轨道）`，不修改本表 step 状态。
 
 ## 3. 当前执行上下文
-1. 项目轨道当前 step：`STEP-12`（待门禁，未收到 `start next step`）。
-2. 独立任务轨道：工作流 v3.1 文档对齐（本轮执行，不计入项目 step）。
+1. 项目轨道当前 step：`STEP-12`（ing，已收到 `start next step`）。
+2. 独立任务轨道：无（当前会话在项目 step 轨道）。
 
 ## 4. Step 状态总表
 | 步骤ID | step_order | 步骤名称 | 状态 | 自动化测试 | AI ReviewCode | 已提交 | 提交时间 | commit_ref | 阻塞 | 备注 |
@@ -71,7 +71,7 @@
 | STEP-09 | 9 | 完成 V1 回归与失败路径覆盖 | done | ✓ | ✓ | ✓ | 2026-02-22T16:04:12+08:00 | - | ✗ | V1 基线完成 |
 | STEP-10 | 10 | 中文友好与新手友好文档同步 | done | ✗ | ✓ | ✓ | 2026-02-22T16:35:28+08:00 | - | ✗ | docs-only |
 | STEP-11 | 11 | V2 文档重构（图注增强 + 进度提交时间制） | done | ✗ | ✓ | ✓ | 2026-02-23T09:14:36+08:00 | c44e8e7 | ✗ | 已提交收口；only executing current step scope |
-| STEP-12 | 12 | LangChain 迁移设计冻结 | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |
+| STEP-12 | 12 | LangChain 迁移设计冻结 | ing | ✓ | ✓ | ✗ | - | - | ✗ | 已完成设计规格冻结与一致性校验，待人工确认后进入待提交；only executing current step scope |
 | STEP-13 | 13 | 边界条件精简与测试矩阵重构 | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |
 | STEP-14 | 14 | 检索主链路渐进迁移到 LangChain | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |
 | STEP-15 | 15 | V2 回归验收与文档收口 | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |

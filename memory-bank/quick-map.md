@@ -41,8 +41,8 @@
 
 ## 当前焦点
 1. 当前项目主线：RAG V2（LangChain 渐进迁移）。
-2. 项目轨道当前 step：`STEP-12`（待门禁，未收到 `start next step`）。
-3. 当前独立任务：工作流 v3.1 对齐审计与文档修订（不计入项目 step）。
+2. 项目轨道当前 step：`STEP-12`（ing，已收到 `start next step`）。
+3. 当前独立任务：无（当前会话在项目 step 轨道）。
 
 ## read_order（最小读取顺序）
 ```yaml

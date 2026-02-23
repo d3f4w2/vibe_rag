@@ -59,10 +59,10 @@
    - 错误分层（`ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError`）保留。
 
 ## 2. 当前执行上下文（唯一）
-1. 项目轨道 `current_step_id`: `STEP-12`（pending gate）。
+1. 项目轨道 `current_step_id`: `STEP-12`（ing）。
 2. `goal`: 冻结 LangChain 渐进迁移设计（接口、数据流、错误边界）。
-3. `selection_reason`: `STEP-11` 已以 commit `c44e8e7` 收口完成；当前按规则选择最小 `todo` 为 `STEP-12`，但未收到 `start next step` 前不得进入实现。
-4. 独立任务轨道：允许执行治理文档维护，不得修改项目轨道 step 状态。
+3. `selection_reason`: `STEP-11` 已以 commit `c44e8e7` 收口完成；当前按规则选择最小 `todo` 为 `STEP-12`，且已收到 `start next step`，进入当前 step 执行。
+4. 执行约束：仅执行 `STEP-12` 设计冻结，不跨 step 提前实现。
 
 ## 3. V2 Step List
 
@@ -157,6 +157,6 @@
    - `EPIC-V2-QA`: STEP-15 完成
 
 ## 5. 执行边界（当前轮）
-1. 项目轨道停留在 STEP-12 待门禁状态，不进入实现。
+1. 项目轨道执行 STEP-12 设计冻结（docs-only），不进入 STEP-14 代码实现。
 2. AI 可见后续步骤内容，但不得跨 step 提前实现。
 3. only executing current step scope.

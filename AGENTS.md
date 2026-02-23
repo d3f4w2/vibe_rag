@@ -73,13 +73,19 @@
 12. Trigger：出现 blocker（测试失败、依赖缺失、需求冲突、权限限制等）。
     - Action：立即停止推进，将当前 step 标记为 `blocked`，并记录解除条件。
     - Output：`blocker_description + impact_scope + unblock_conditions + suggested_decision`。
-13. Trigger：自动化测试通过 + AI Review 完成 + 人类确认通过。
+13. Trigger：自动化测试通过。
+    - Action：必须执行 AI Review，并记录审查结论。
+    - Output：`ai_review_summary`。
+14. Trigger：AI Review 发现问题且已完成修复。
+    - Action：必须再次执行回归测试（至少覆盖受影响路径）；未通过不得进入 git 阶段。
+    - Output：`post_review_regression_result + tests_failed_summary/tests_passed_summary`。
+15. Trigger：自动化测试通过 + AI Review 完成 +（若有修复则回归测试通过）+ 人类确认通过。
     - Action：进入 git 前检查 `.gitignore` 并给中文 commit 建议。
     - Output：`gitignore_check_result + commit_message_suggestion_zh`。
-14. Trigger：人类完成 commit。
+16. Trigger：人类完成 commit。
     - Action：回填 `memory-bank/progress.md` 中的 `commit_ref`。
     - Output：`commit_ref_linked`。
-15. Trigger：blocker 解除并经人类确认。
+17. Trigger：blocker 解除并经人类确认。
     - Action：将当前 step 从 `blocked` 改为 `ing`，并更新记录。
     - Output：`resume_basis + next_action_after_resume`。
 
@@ -88,6 +94,8 @@
 - `goal`
 - `tests_failed_summary`
 - `tests_passed_summary`
+- `ai_review_summary`
+- `post_review_regression_result`（如 AI Review 后有修复则必填；无修复填 `N/A`）
 - `manual_test_plan`
 - `next_action`
 - `blockers`（如有）
@@ -97,3 +105,5 @@
 1. `conflict_point`：冲突点是什么。
 2. `applied_priority`：采用了哪一层优先级（`Always` / `Execution flow` / `Example statement`）。
 3. `resolution_result`：实际执行内容，以及被延后或拒绝的内容。
+   
+## 7) 与用户交互时尽量使用中文输出！
