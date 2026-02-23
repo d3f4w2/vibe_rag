@@ -59,10 +59,10 @@
    - 错误分层（`ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError`）保留。
 
 ## 2. 当前执行上下文（唯一）
-1. 项目轨道 `current_step_id`: `STEP-13`（`ing`）。
-2. `goal`: 边界条件精简与测试矩阵重构（保留关键防线 + 合并重复分支）。
-3. `selection_reason`: `STEP-12` 已以 commit `ce60db5` 收口完成；当前按规则选择最小 `todo` 为 `STEP-13`，且已收到人类命令 `start next step`。
-4. 执行约束：当前仅允许执行 `STEP-13` 范围，不跨 step 提前实现。
+1. 项目轨道 `current_step_id`: `STEP-14`（ing）。
+2. `goal`: 检索主链路渐进迁移到 LangChain（先 retrieval）。
+3. `selection_reason`: `STEP-13` 已以 commit `f14a470` 收口完成；已收到 `start next step`，当前进入 `STEP-14` 执行态。
+4. 执行约束：当前会话仅执行 `STEP-14` 范围，不跨 step 提前实现。
 
 ## 3. V2 Step List
 
@@ -131,6 +131,9 @@
    - 关键回归测试通过，检索行为与结构不倒退。
 7. 门禁：
    - 仅在收到 `start next step` 后执行。
+8. 环境基线（执行约束）：
+   - 运行与测试使用 conda 环境：`vibe-rag`。
+   - 关键依赖版本：`chromadb==1.5.1`、`langchain==1.2.10`、`langchain-core==1.2.14`、`langchain-community==0.4.1`、`langchain-chroma==1.1.0`、`httpx==0.28.1`。
 
 ### Step 15
 1. Step ID: `STEP-15`
@@ -157,6 +160,6 @@
    - `EPIC-V2-QA`: STEP-15 完成
 
 ## 5. 执行边界（当前轮）
-1. 项目轨道停留在 `STEP-13` 执行中状态，不进入下一 step。
+1. 项目轨道位于 `STEP-14` 执行中状态，按 TDD 推进实现与回归。
 2. AI 可见后续步骤内容，但不得跨 step 提前实现。
 3. only executing current step scope.

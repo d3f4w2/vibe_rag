@@ -36,25 +36,41 @@
 ## 更新时间
 2026-02-23
 
-## 1. 当前实际技术栈（V1 已落地）
+## 1. 当前实际技术栈（V2，STEP-14 执行中）
 | 组件 | 作用 | 代码落点 |
 |---|---|---|
 | Python + conda | 运行环境与开发环境 | 全项目 |
 | chromadb | 本地向量持久化与检索 | `src/retrieval/vector_store_chroma.py` |
 | httpx | 外部 API 调用 | `src/infra/api_client.py` |
+| langchain / langchain-core | 检索编排主链路抽象 | `src/retrieval/langchain_retriever.py` |
+| langchain-community | LangChain 社区组件集 | `src/retrieval/langchain_retriever.py` |
+| langchain-chroma | LangChain 与 Chroma 对接 | `src/retrieval/langchain_retriever.py` |
 | pytest | 自动化测试 | `tests/` |
 | ruff | 代码质量约束（保留策略） | 项目规范 |
 | .env + 环境变量 | provider 配置注入 | `src/infra/api_client.py` |
 
-说明：当前检索主链路仍以手写编排为主（`src/retrieval/retriever.py`）。
+说明：默认检索工厂已切换到 LangChain 实现（`src/retrieval/retriever.py` -> `src/retrieval/langchain_retriever.py`），`VectorOnlyRetriever` 仍保留用于兼容测试与回退。
 
-## 2. 目标技术栈（V2 渐进）
-| 目标组件 | 迁移目的 | 迁移阶段 |
+## 1.1 关键版本基线（vibe-rag，2026-02-23）
+| 组件 | 版本 | 说明 |
+|---|---:|---|
+| chromadb | 1.5.1 | 当前向量数据库实现 |
+| httpx | 0.28.1 | API 客户端传输层 |
+| langchain | 1.2.10 | 检索链路主框架 |
+| langchain-core | 1.2.14 | LangChain 核心接口 |
+| langchain-community | 0.4.1 | 社区扩展组件 |
+| langchain-chroma | 1.1.0 | Chroma 对接适配 |
+| langsmith | 0.7.6 | LangChain 观测依赖（随环境存在） |
+
+注：其余运行时库版本以人类提供的 `vibe-rag` 环境清单为准。
+
+## 2. 迁移目标技术栈（V2 渐进）
+| 目标组件 | 迁移目的 | 阶段 |
 |---|---|---|
-| langchain / langchain-core | 降低手写编排冗余，统一检索链路抽象 | STEP-12 / STEP-14 |
-| LangChain Embeddings | 统一向量化入口 | STEP-14 |
-| LangChain VectorStore Adapter | 规范化向量库接入层 | STEP-14 |
-| Retriever Adapter（项目内） | 保持输出契约兼容，隔离迁移风险 | STEP-12 / STEP-14 |
+| langchain / langchain-core | 统一检索链路抽象，降低手写编排冗余 | STEP-12 设计冻结，STEP-14 已执行 |
+| LangChain Embeddings Adapter（项目内） | 复用现有 `ApiClient` 接口进行向量化 | STEP-14 |
+| langchain-chroma | 统一 Chroma 检索入口 | STEP-14 |
+| metadata codec（项目内） | 维持 metadata 非标量字段兼容 | STEP-13 已落地，STEP-14 复用 |
 
 ## 3. 必须保留（迁移期间不变）
 1. 错误分层语义：
@@ -70,7 +86,7 @@
 1. STEP-11：文档清晰化（图注增强、提交时间制）。
 2. STEP-12：冻结接口与数据流设计（不写代码实现）。
 3. STEP-13：边界条件矩阵与测试策略重构。
-4. STEP-14：检索主链路渐进迁移到 LangChain。
+4. STEP-14：检索主链路迁移到 LangChain（执行中，默认工厂已切换）。
 5. STEP-15：回归验收与文档收口。
 
 ## 5. 暂不引入（本阶段）

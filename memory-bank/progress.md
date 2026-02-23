@@ -54,7 +54,7 @@
 5. 独立任务模式下输出 `current_step_id: N/A（独立任务轨道）`，不修改本表 step 状态。
 
 ## 3. 当前执行上下文
-1. 项目轨道当前 step：`STEP-13`（`ing`，已收到 `start next step` 并进入执行）。
+1. 项目轨道当前 step：`STEP-14`（执行中，已收到 `start next step`）。
 2. 独立任务轨道：无（当前会话在项目 step 轨道）。
 
 ## 4. Step 状态总表
@@ -72,8 +72,8 @@
 | STEP-10 | 10 | 中文友好与新手友好文档同步 | done | ✗ | ✓ | ✓ | 2026-02-22T16:35:28+08:00 | - | ✗ | docs-only |
 | STEP-11 | 11 | V2 文档重构（图注增强 + 进度提交时间制） | done | ✗ | ✓ | ✓ | 2026-02-23T09:14:36+08:00 | c44e8e7 | ✗ | 已提交收口；only executing current step scope |
 | STEP-12 | 12 | LangChain 迁移设计冻结 | done | ✓ | ✓ | ✓ | 2026-02-23T11:35:29+08:00 | ce60db5 | ✗ | 已完成收口并回填 commit；only executing current step scope |
-| STEP-13 | 13 | 边界条件精简与测试矩阵重构 | ing | ✓ | ✓ | ✗ | - | - | ✗ | 已完成边界矩阵重构与 metadata 非标量兼容修复；`vibe-rag` 下 `python -m pytest -q tests` 通过（51 passed）；待人工确认后转 `待提交`；only executing current step scope |
-| STEP-14 | 14 | 检索主链路渐进迁移到 LangChain | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |
+| STEP-13 | 13 | 边界条件精简与测试矩阵重构 | done | ✓ | ✓ | ✓ | 2026-02-23T12:01:19+08:00 | f14a470 | ✗ | 已完成收口并回填 commit；自动化回归通过（51 passed）；only executing current step scope |
+| STEP-14 | 14 | 检索主链路渐进迁移到 LangChain | ing | ✓ | ✓ | ✗ | - | - | ✗ | 已切换默认检索工厂至 LangChain；`vibe-rag` 回归通过（55 passed）；待人工验收确认后进入待提交；only executing current step scope |
 | STEP-15 | 15 | V2 回归验收与文档收口 | todo | ✗ | ✗ | ✗ | - | - | ✗ | 待人类命令 `start next step` |
 
 ## 5. 阻塞记录（仅有 blocker 时新增）

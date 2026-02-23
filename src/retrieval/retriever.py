@@ -4,7 +4,6 @@ from typing import Protocol
 
 from src.infra.api_client import ApiClient
 from src.retrieval.document_builder import RetrievalDocument
-from src.retrieval.vector_store_chroma import ChromaVectorStore
 
 
 class RetrieverError(ValueError):
@@ -25,6 +24,14 @@ class VectorStoreProtocol(Protocol):
         ...
 
     def query(self, *, query_embedding: list[float], top_k: int) -> list[dict[str, object]]:
+        ...
+
+
+class RetrieverProtocol(Protocol):
+    def index_documents(self, documents: list[RetrievalDocument]) -> None:
+        ...
+
+    def retrieve(self, query_text: str, *, top_k: int = 5) -> list[dict[str, object]]:
         ...
 
 
@@ -61,8 +68,10 @@ class VectorOnlyRetriever:
 def build_default_vector_only_retriever(
     *,
     collection_name: str = "case_records",
-) -> VectorOnlyRetriever:
-    return VectorOnlyRetriever(
+) -> RetrieverProtocol:
+    from src.retrieval.langchain_retriever import LangChainRetriever
+
+    return LangChainRetriever(
         api_client=ApiClient(),
-        vector_store=ChromaVectorStore(collection_name=collection_name),
+        collection_name=collection_name,
     )

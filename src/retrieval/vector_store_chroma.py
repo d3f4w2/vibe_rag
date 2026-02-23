@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -9,6 +8,13 @@ import chromadb
 
 from src.infra.api_client import load_dotenv_if_present
 from src.retrieval.document_builder import RetrievalDocument
+from src.retrieval.metadata_codec import (
+    ENCODED_METADATA_KEYS_FIELD,
+    LEGACY_ENCODED_METADATA_KEYS_FIELD,
+    is_chroma_scalar,
+    restore_metadata_from_chroma,
+    sanitize_metadata_for_chroma,
+)
 
 
 class VectorStoreError(ValueError):
@@ -16,8 +22,8 @@ class VectorStoreError(ValueError):
 
 
 class ChromaVectorStore:
-    _ENCODED_METADATA_KEYS_FIELD = "rag_encoded_json_keys"
-    _LEGACY_ENCODED_METADATA_KEYS_FIELD = "__rag_encoded_json_keys"
+    _ENCODED_METADATA_KEYS_FIELD = ENCODED_METADATA_KEYS_FIELD
+    _LEGACY_ENCODED_METADATA_KEYS_FIELD = LEGACY_ENCODED_METADATA_KEYS_FIELD
 
     def __init__(
         self,
@@ -163,66 +169,17 @@ class ChromaVectorStore:
         *,
         field_name: str,
     ) -> dict[str, Any]:
-        sanitized: dict[str, Any] = {}
-        encoded_keys: list[str] = []
-
-        for key, value in metadata.items():
-            if not isinstance(key, str):
-                raise VectorStoreError(f"{field_name} keys must be strings.")
-            if key in {cls._ENCODED_METADATA_KEYS_FIELD, cls._LEGACY_ENCODED_METADATA_KEYS_FIELD}:
-                raise VectorStoreError(
-                    f"{field_name} cannot contain reserved key {key}."
-                )
-
-            if cls._is_chroma_scalar(value):
-                sanitized[key] = value
-                continue
-
-            try:
-                sanitized[key] = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-            except TypeError as exc:
-                raise VectorStoreError(
-                    f"{field_name}.{key} must be JSON-serializable when non-scalar."
-                ) from exc
-            encoded_keys.append(key)
-
-        if encoded_keys:
-            sanitized[cls._ENCODED_METADATA_KEYS_FIELD] = json.dumps(
-                encoded_keys,
-                ensure_ascii=False,
-                separators=(",", ":"),
-            )
-        return sanitized
+        del cls
+        try:
+            return sanitize_metadata_for_chroma(metadata, field_name=field_name)
+        except ValueError as exc:
+            raise VectorStoreError(str(exc)) from exc
 
     @classmethod
     def _restore_metadata_from_chroma(cls, metadata: dict[str, Any]) -> dict[str, Any]:
-        restored = dict(metadata)
-        encoded_keys_raw = restored.pop(cls._ENCODED_METADATA_KEYS_FIELD, None)
-        if encoded_keys_raw is None:
-            encoded_keys_raw = restored.pop(cls._LEGACY_ENCODED_METADATA_KEYS_FIELD, None)
-        if not isinstance(encoded_keys_raw, str):
-            return restored
-
-        try:
-            encoded_keys = json.loads(encoded_keys_raw)
-        except json.JSONDecodeError:
-            return restored
-        if not isinstance(encoded_keys, list):
-            return restored
-
-        for key in encoded_keys:
-            if not isinstance(key, str):
-                continue
-            raw_value = restored.get(key)
-            if not isinstance(raw_value, str):
-                continue
-            try:
-                restored[key] = json.loads(raw_value)
-            except json.JSONDecodeError:
-                continue
-
-        return restored
+        del cls
+        return restore_metadata_from_chroma(metadata)
 
     @staticmethod
     def _is_chroma_scalar(value: object) -> bool:
-        return value is None or isinstance(value, (str, int, float, bool))
+        return is_chroma_scalar(value)

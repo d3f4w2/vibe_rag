@@ -142,9 +142,10 @@ class RetrieverAdapterProtocol(Protocol):
 5. 不改 `tendency_service` 判定逻辑。
 
 ## 7. STEP-14 实施清单
-1. 新增 `src/retrieval/adapter.py`
+1. 新增 `src/retrieval/langchain_retriever.py`（Adapter 等价落点）
    - 实现 `RetrieverAdapterProtocol`。
    - 封装 LangChain 检索调用与结果标准化。
+   - 复用 `src/retrieval/metadata_codec.py` 处理 metadata 非标量字段兼容。
 2. 修改 `src/retrieval/retriever.py`
    - 保持旧接口可用。
    - 提供迁移期工厂方法，允许切换实现。

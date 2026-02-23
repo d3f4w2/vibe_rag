@@ -55,9 +55,11 @@ flowchart LR
     end
 
     subgraph L1[检索与推理层]
-        RET["src/retrieval/retriever.py<br/>职责：检索流程编排（embed/query）"]
+        RET["src/retrieval/retriever.py<br/>职责：检索协议与默认工厂（默认LangChain）"]
+        LCRET["src/retrieval/langchain_retriever.py<br/>职责：LangChain检索主链路实现"]
         DOC["src/retrieval/document_builder.py<br/>职责：组装检索文档与证据元数据"]
         VS["src/retrieval/vector_store_chroma.py<br/>职责：Chroma写入与Top-K召回"]
+        CODEC["src/retrieval/metadata_codec.py<br/>职责：metadata非标量字段编解码兼容"]
         API["src/infra/api_client.py<br/>职责：外部API调用、重试与错误映射"]
         REASON["src/reasoning/tendency_service.py<br/>职责：输出HSIL/LSIL/Uncertain与理由"]
     end
@@ -77,9 +79,11 @@ flowchart LR
     U --> CLI
     CLI --> RET
     CLI --> REASON
-    RET --> DOC
-    RET --> VS
-    RET --> API
+    RET --> LCRET
+    LCRET --> DOC
+    LCRET --> VS
+    LCRET --> CODEC
+    LCRET --> API
     DOC --> META
     META --> PARSER
     META --> MODEL
@@ -93,18 +97,21 @@ flowchart LR
 sequenceDiagram
     participant U as 用户（发起查询）
     participant CLI as src/cli/main.py（参数校验与编排）
-    participant RET as src/retrieval/retriever.py（检索编排）
+    participant RET as src/retrieval/retriever.py（默认工厂分发）
+    participant LCRET as src/retrieval/langchain_retriever.py（LangChain检索）
     participant API as src/infra/api_client.py（向量API调用）
-    participant VS as src/retrieval/vector_store_chroma.py（Top-K召回）
+    participant VS as langchain_chroma.Chroma（Top-K召回）
     participant RS as src/reasoning/tendency_service.py（倾向判定）
 
     U->>CLI: rag-query --stain-text/--stain-file --top-k
-    CLI->>RET: retrieve(query_text, top_k)
-    RET->>API: embed_texts([query_text])
-    API-->>RET: query_embedding
-    RET->>VS: query(query_embedding, top_k)
-    VS-->>RET: similar_cases[]
-    RET-->>CLI: similar_cases[]
+    CLI->>RET: build_default_vector_only_retriever()
+    RET-->>CLI: LangChainRetriever
+    CLI->>LCRET: retrieve(query_text, top_k)
+    LCRET->>API: embed_texts([query_text]) via Embeddings adapter
+    API-->>LCRET: query_embedding
+    LCRET->>VS: similarity_search_with_relevance_scores(query, k)
+    VS-->>LCRET: similar_cases[]
+    LCRET-->>CLI: similar_cases[]
     CLI->>RS: infer_tendency(similar_cases, top_k)
     RS-->>CLI: tendency/reason/disclaimer
     CLI-->>U: structured JSON
@@ -118,7 +125,8 @@ flowchart LR
     end
 
     subgraph ADP[迁移适配层]
-        ADAPTER["src/retrieval/adapter.py（规划）<br/>职责：LangChain输出转换为similar_cases契约"]
+        ADAPTER["src/retrieval/langchain_retriever.py（已落地）<br/>职责：LangChain输出转换为similar_cases契约"]
+        CODEC["src/retrieval/metadata_codec.py（已落地）<br/>职责：metadata非标量字段编解码兼容"]
     end
 
     subgraph LC[LangChain检索层]
@@ -137,6 +145,7 @@ flowchart LR
     end
 
     CLI --> ADAPTER
+    ADAPTER --> CODEC
     ADAPTER --> LC_RET
     LC_RET --> LC_EMB
     LC_RET --> LC_VS
@@ -154,7 +163,9 @@ flowchart LR
 | ingestion.metadata_store | `src/ingestion/metadata_store.py` | 构建并读写 JSONL 元数据 | scanned case + text | metadata rows | parser, case_record | 元数据读写错误 |
 | retrieval.document_builder | `src/retrieval/document_builder.py` | 构建检索文档对象 | metadata + text | retrieval documents | ingestion metadata | `DocumentBuildError` |
 | retrieval.vector_store_chroma | `src/retrieval/vector_store_chroma.py` | Chroma upsert/query + metadata 非标量字段编码恢复 | vectors/docs | top-k similar cases | chromadb | `VectorStoreError` |
-| retrieval.retriever | `src/retrieval/retriever.py` | 编排向量检索主链路 | query/top_k | similar_cases | api_client, vector_store | `RetrieverError` |
+| retrieval.metadata_codec | `src/retrieval/metadata_codec.py` | metadata 非标量字段 JSON 编解码（兼容 Chroma scalar 限制） | metadata dict | sanitized/restored metadata | json | `ValueError` |
+| retrieval.langchain_retriever | `src/retrieval/langchain_retriever.py` | LangChain 检索主链路、结果契约映射 | query/top_k 或 documents | similar_cases / upsert side effect | ApiClient, langchain-chroma, metadata_codec | `RetrieverError` + API 分层错误 |
+| retrieval.retriever | `src/retrieval/retriever.py` | 检索协议定义与默认工厂（默认返回 LangChainRetriever） | collection_name | retriever instance | ApiClient, langchain_retriever | `RetrieverError` |
 | reasoning.tendency_service | `src/reasoning/tendency_service.py` | 倾向判定与理由输出 | similar_cases | tendency payload | retrieval schema | `ValueError` |
 | infra.api_client | `src/infra/api_client.py` | API 调用、重试、错误映射 | texts/prompt | embeddings/text | httpx, env | `ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError` |
 | cli.main | `src/cli/main.py` | 参数校验、流程编排、结构化输出 | CLI args | JSON + exit code | retriever, tendency | `CliArgumentError` |
@@ -175,5 +186,11 @@ flowchart LR
    - 新增 `memory-bank/feature-13-test-policy.md`，沉淀边界条件矩阵（保留/合并/删除）与回归映射。
    - 在 `src/retrieval/vector_store_chroma.py` 增加 metadata 非标量字段（list/dict）编码与查询恢复能力，修复 Chroma scalar 限制导致的失败路径。
    - `vibe-rag` 环境下回归通过：`conda run -n vibe-rag python -m pytest -q tests`（51 passed）。
-5. 执行边界：
+   - 人类提交 `commit_ref: f14a470`（2026-02-23T12:01:19+08:00），STEP-13 已完成收口。
+5. STEP-14（EPIC-V2-RETRIEVAL-REFACTOR，ing）：
+   - 新增 `src/retrieval/langchain_retriever.py`，落地 LangChain 检索主链路与 `similar_cases` 输出契约映射。
+   - 新增 `src/retrieval/metadata_codec.py`，统一 metadata 非标量字段编解码逻辑；`vector_store_chroma` 与 LangChain 链路复用同一策略。
+   - `src/retrieval/retriever.py` 默认工厂切换至 LangChain 实现，保留 `VectorOnlyRetriever` 兼容路径。
+   - `vibe-rag` 环境下全量回归通过：`conda run -n vibe-rag python -m pytest -q tests`（55 passed）。
+6. 执行边界：
    - only executing current step scope.
