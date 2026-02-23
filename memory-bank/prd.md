@@ -96,6 +96,16 @@ V1 已完成可运行基线，但存在三个核心问题：
 5. `tech-stack.md` 的“现状/目标/保留项”与架构图一致。
 6. V2 各 step 完成后可在测试与文档中追溯验收。
 
+### 7.1 STEP-15 验收映射（测试与文档可追溯）
+| 验收项 | 证据类型 | 证据锚点 |
+|---|---|---|
+| 7.1-1：三张核心图齐备 | 文档 | `memory-bank/architecture.md` 第 2/3/4 节 |
+| 7.1-2：图内脚本节点含中文职责注释 | 文档 | `memory-bank/architecture.md` 第 2/3/4 节图内节点注释 |
+| 7.1-3：`progress.md` 使用 `提交时间` 且未提交为 `-` | 文档 | `memory-bank/progress.md` 第 1 节规则 + Step 状态总表 |
+| 7.1-4：`implementation-plan.md` 与 `progress.md` 状态/门禁一致 | 文档 | `memory-bank/implementation-plan.md` 第 2/5 节 + `memory-bank/progress.md` 第 3/4 节 |
+| 7.1-5：`tech-stack.md` 与架构口径一致 | 文档 | `memory-bank/tech-stack.md` 第 1-4 节 + `memory-bank/architecture.md` 第 4/5 节 |
+| 7.1-6：V2 结果可在测试与文档中追溯 | 自动化测试 + 文档 | `conda run -n vibe-rag python -m pytest -q tests`（55 passed）+ `memory-bank/progress.md`（STEP-15 行） |
+
 ## 8. 风险与应对
 1. 风险：图注过长导致图拥挤。
    - 应对：图内职责注释保持短句，细节写表格。
@@ -105,7 +115,8 @@ V1 已完成可运行基线，但存在三个核心问题：
    - 应对：每轮先读 `quick-map.md` 并按 `read_order` 最小读取。
 
 ## 9. 当前结论（2026-02-23）
-1. 项目轨道 `STEP-13` 已完成并提交（`commit_ref: f14a470`）。
-2. 当前焦点为 `STEP-14` 执行中（已收到 `start next step`）。
+1. 项目轨道 `STEP-14` 已完成并提交（`commit_ref: d7bdcc0`）。
+2. `STEP-15` 已完成自动化回归与验收映射同步，当前处于 `待提交`（等待人类 commit）。
 3. STEP-14 执行环境基线锁定为 conda `vibe-rag`，关键依赖版本见 `tech-stack.md`。
-4. only executing current step scope.
+4. STEP-15 自动化回归结果：`conda run -n vibe-rag python -m pytest -q tests`（55 passed）。
+5. only executing current step scope.

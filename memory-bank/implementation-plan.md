@@ -59,10 +59,10 @@
    - 错误分层（`ApiTimeoutError/ApiAuthError/ApiRateLimitError/ApiResponseError`）保留。
 
 ## 2. 当前执行上下文（唯一）
-1. 项目轨道 `current_step_id`: `STEP-14`（ing）。
-2. `goal`: 检索主链路渐进迁移到 LangChain（先 retrieval）。
-3. `selection_reason`: `STEP-13` 已以 commit `f14a470` 收口完成；已收到 `start next step`，当前进入 `STEP-14` 执行态。
-4. 执行约束：当前会话仅执行 `STEP-14` 范围，不跨 step 提前实现。
+1. 项目轨道 `current_step_id`: `STEP-15`（待提交）。
+2. `goal`: 完成 V2 回归验收与文档收口。
+3. `selection_reason`: `STEP-14` 已以 commit `d7bdcc0` 收口完成；当前按规则选择最小 `todo` 为 `STEP-15`，并已完成自动化回归（55 passed）与 AI Review。
+4. 执行约束：仅执行 `STEP-15` 范围，不跨 step 提前实现；当前等待人类 commit 后回填 `commit_ref`。
 
 ## 3. V2 Step List
 
@@ -160,6 +160,6 @@
    - `EPIC-V2-QA`: STEP-15 完成
 
 ## 5. 执行边界（当前轮）
-1. 项目轨道位于 `STEP-14` 执行中状态，按 TDD 推进实现与回归。
+1. 项目轨道已完成 `STEP-15` 收口范围（自动化回归、AI Review、验收映射、文档回填），当前处于 `待提交`。
 2. AI 可见后续步骤内容，但不得跨 step 提前实现。
 3. only executing current step scope.

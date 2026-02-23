@@ -41,7 +41,7 @@
 
 ## 当前焦点
 1. 当前项目主线：RAG V2（LangChain 渐进迁移）。
-2. 项目轨道当前 step：`STEP-14`（执行中，LangChain 主链路迁移）。
+2. 项目轨道当前 step：`STEP-15`（待提交，等待人类 commit）。
 3. 当前独立任务：无（当前会话在项目 step 轨道）。
 
 ## read_order（最小读取顺序）

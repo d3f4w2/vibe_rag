@@ -36,7 +36,7 @@
 ## 更新时间
 2026-02-23
 
-## 1. 当前实际技术栈（V2，STEP-14 执行中）
+## 1. 当前实际技术栈（V2，STEP-15 回归验收完成）
 | 组件 | 作用 | 代码落点 |
 |---|---|---|
 | Python + conda | 运行环境与开发环境 | 全项目 |
@@ -49,7 +49,7 @@
 | ruff | 代码质量约束（保留策略） | 项目规范 |
 | .env + 环境变量 | provider 配置注入 | `src/infra/api_client.py` |
 
-说明：默认检索工厂已切换到 LangChain 实现（`src/retrieval/retriever.py` -> `src/retrieval/langchain_retriever.py`），`VectorOnlyRetriever` 仍保留用于兼容测试与回退。
+说明：默认检索工厂已切换到 LangChain 实现（`src/retrieval/retriever.py` -> `src/retrieval/langchain_retriever.py`），`VectorOnlyRetriever` 仍保留用于兼容测试与回退。STEP-15 仅执行 QA 收口与文档回填，不新增运行时依赖。
 
 ## 1.1 关键版本基线（vibe-rag，2026-02-23）
 | 组件 | 版本 | 说明 |
@@ -86,8 +86,8 @@
 1. STEP-11：文档清晰化（图注增强、提交时间制）。
 2. STEP-12：冻结接口与数据流设计（不写代码实现）。
 3. STEP-13：边界条件矩阵与测试策略重构。
-4. STEP-14：检索主链路迁移到 LangChain（执行中，默认工厂已切换）。
-5. STEP-15：回归验收与文档收口。
+4. STEP-14：检索主链路迁移到 LangChain（已完成，默认工厂已切换）。
+5. STEP-15：回归验收与文档收口（本轮已完成自动化回归与验收映射，待人类 commit）。
 
 ## 5. 暂不引入（本阶段）
 1. 服务化框架（如 FastAPI）不是本轮目标。

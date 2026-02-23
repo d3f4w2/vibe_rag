@@ -187,10 +187,17 @@ flowchart LR
    - 在 `src/retrieval/vector_store_chroma.py` 增加 metadata 非标量字段（list/dict）编码与查询恢复能力，修复 Chroma scalar 限制导致的失败路径。
    - `vibe-rag` 环境下回归通过：`conda run -n vibe-rag python -m pytest -q tests`（51 passed）。
    - 人类提交 `commit_ref: f14a470`（2026-02-23T12:01:19+08:00），STEP-13 已完成收口。
-5. STEP-14（EPIC-V2-RETRIEVAL-REFACTOR，ing）：
+5. STEP-14（EPIC-V2-RETRIEVAL-REFACTOR，done）：
    - 新增 `src/retrieval/langchain_retriever.py`，落地 LangChain 检索主链路与 `similar_cases` 输出契约映射。
    - 新增 `src/retrieval/metadata_codec.py`，统一 metadata 非标量字段编解码逻辑；`vector_store_chroma` 与 LangChain 链路复用同一策略。
    - `src/retrieval/retriever.py` 默认工厂切换至 LangChain 实现，保留 `VectorOnlyRetriever` 兼容路径。
    - `vibe-rag` 环境下全量回归通过：`conda run -n vibe-rag python -m pytest -q tests`（55 passed）。
-6. 执行边界：
+   - 人类提交 `commit_ref: d7bdcc0`（2026-02-23T12:27:45+08:00），STEP-14 已完成收口。
+6. STEP-15（EPIC-V2-QA，待提交）：
+   - 完成 V2 全量自动化回归与验收映射同步：`conda run -n vibe-rag python -m pytest -q tests`（55 passed）。
+   - 模块职责变化：无。
+   - 文件角色变化：无。
+   - 依赖变化：无。
+   - 变更原因：本 step 属于 QA 与文档收口，不引入功能性改动。
+7. 执行边界：
    - only executing current step scope.
